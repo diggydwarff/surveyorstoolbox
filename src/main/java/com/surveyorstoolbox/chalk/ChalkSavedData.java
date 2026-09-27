@@ -52,30 +52,16 @@ public final class ChalkSavedData extends SavedData {
         return tag;
     }
 
-    public AddResult saveColored(ServerPlayer player, DyeColor color, MeasurementSnapshot measurement) {
+    public AddResult add(ServerPlayer player, DyeColor color, MeasurementSnapshot measurement) {
         MeasurementSnapshot compact = measurement.compacted();
         if (!compact.isValidForPersistence()) return AddResult.INVALID;
 
-        int existingIndex = findOwnedMeasurement(player.getUUID(), compact);
-        if (existingIndex >= 0) {
-            ChalkMark existing = marks.get(existingIndex);
-            if (existing.color() == color && existing.glowing()) {
+        for (ChalkMark existing : marks) {
+            if (existing.owner().equals(player.getUUID())
+                    && existing.color() == color
+                    && existing.measurement().equals(compact)) {
                 return AddResult.DUPLICATE;
             }
-            if (existing.color() == color && !existing.glowing()) {
-                return AddResult.DUPLICATE;
-            }
-
-            marks.set(existingIndex, new ChalkMark(
-                    existing.id(),
-                    existing.owner(),
-                    existing.ownerName(),
-                    color,
-                    existing.glowing(),
-                    compact
-            ));
-            setDirty();
-            return AddResult.UPDATED;
         }
 
         if (marks.size() >= MAX_MARKS_PER_DIMENSION) {
@@ -87,60 +73,10 @@ public final class ChalkSavedData extends SavedData {
                 player.getUUID(),
                 player.getGameProfile().getName(),
                 color,
-                false,
                 compact
         ));
         setDirty();
         return AddResult.ADDED;
-    }
-
-    public AddResult saveGlow(ServerPlayer player, MeasurementSnapshot measurement) {
-        MeasurementSnapshot compact = measurement.compacted();
-        if (!compact.isValidForPersistence()) return AddResult.INVALID;
-
-        int existingIndex = findOwnedMeasurement(player.getUUID(), compact);
-        if (existingIndex >= 0) {
-            ChalkMark existing = marks.get(existingIndex);
-            if (existing.glowing()) {
-                return AddResult.DUPLICATE;
-            }
-
-            marks.set(existingIndex, new ChalkMark(
-                    existing.id(),
-                    existing.owner(),
-                    existing.ownerName(),
-                    existing.color(),
-                    true,
-                    compact
-            ));
-            setDirty();
-            return AddResult.UPDATED;
-        }
-
-        if (marks.size() >= MAX_MARKS_PER_DIMENSION) {
-            return AddResult.FULL;
-        }
-
-        marks.add(new ChalkMark(
-                UUID.randomUUID(),
-                player.getUUID(),
-                player.getGameProfile().getName(),
-                DyeColor.WHITE,
-                true,
-                compact
-        ));
-        setDirty();
-        return AddResult.ADDED;
-    }
-
-    private int findOwnedMeasurement(UUID owner, MeasurementSnapshot measurement) {
-        for (int i = 0; i < marks.size(); i++) {
-            ChalkMark mark = marks.get(i);
-            if (mark.owner().equals(owner) && mark.measurement().equals(measurement)) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     public List<ChalkMark> near(Vec3 center, double radius, int limit) {
@@ -185,7 +121,6 @@ public final class ChalkSavedData extends SavedData {
 
     public enum AddResult {
         ADDED,
-        UPDATED,
         DUPLICATE,
         FULL,
         INVALID

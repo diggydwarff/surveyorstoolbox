@@ -4,7 +4,6 @@ import com.surveyorstoolbox.SurveyorsToolbox;
 import com.surveyorstoolbox.client.SurveyClientActions;
 import com.surveyorstoolbox.item.ArchitectsEraserItem;
 import com.surveyorstoolbox.item.ChalkItem;
-import com.surveyorstoolbox.item.GlowChalkItem;
 import com.surveyorstoolbox.measurement.SurveyManager;
 import com.surveyorstoolbox.registry.ModItems;
 import net.minecraft.world.InteractionResult;
@@ -24,7 +23,7 @@ public final class CommonInteractionEvents {
             return;
         }
 
-        if (event.getItemStack().getItem() instanceof ChalkItem || event.getItemStack().getItem() instanceof GlowChalkItem) {
+        if (event.getItemStack().getItem() instanceof ChalkItem) {
             if (event.getEntity().level().isClientSide()) {
                 SurveyClientActions.commitChalk(event.getEntity(), event.getHand());
             }
@@ -57,7 +56,7 @@ public final class CommonInteractionEvents {
             return;
         }
 
-        if (event.getItemStack().getItem() instanceof ChalkItem || event.getItemStack().getItem() instanceof GlowChalkItem) {
+        if (event.getItemStack().getItem() instanceof ChalkItem) {
             if (event.getEntity().level().isClientSide()) {
                 SurveyClientActions.commitChalk(event.getEntity(), event.getHand());
             }

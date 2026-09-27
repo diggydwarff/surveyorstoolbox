@@ -21,7 +21,6 @@ public final class SurveyorsToolbox {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(ModItems.SURVEYORS_RULER.get());
             event.accept(ModItems.ARCHITECTS_ERASER.get());
-            event.accept(ModItems.GLOW_CHALK.get());
             ModItems.CHALKS.values().forEach(item -> event.accept(item.get()));
         }
     }

@@ -85,11 +85,8 @@ public final class PersistentSurveyRenderer {
             double distance = mark.measurement().distanceTo(cameraPos);
             float brightness = distance <= CHALK_FULL_DISTANCE
                     ? 1.0f
-                    : (float) Math.max(mark.glowing() ? 0.60D : 0.42D, 1.0D - (distance - CHALK_FULL_DISTANCE) / 90.0D);
-            if (mark.glowing()) {
-                renderSnapshot(poseStack, mark.measurement(), color(mark.color(), Math.min(1.0f, brightness + 0.20f)), 0.58f * brightness);
-            }
-            renderSnapshot(poseStack, mark.measurement(), color(mark.color(), brightness), (mark.glowing() ? 0.42f : 0.34f) * brightness);
+                    : (float) Math.max(0.42D, 1.0D - (distance - CHALK_FULL_DISTANCE) / 90.0D);
+            renderSnapshot(poseStack, mark.measurement(), color(mark.color(), brightness), 0.34f * brightness);
         }
 
         BUFFERS.endBatch();
@@ -123,11 +120,11 @@ public final class PersistentSurveyRenderer {
 
                 ScreenDirection direction = projectDirection(geometry, camera, guiWidth, guiHeight, minecraft);
                 candidates.add(new LabelCandidate(
-                        compactLabel(snapshot, mark.glowing()),
+                        compactLabel(snapshot),
                         anchor,
                         direction,
                         distance,
-                        accentArgb(mark)
+                        argb(mark.color())
                 ));
             }
 
@@ -138,7 +135,7 @@ public final class PersistentSurveyRenderer {
 
         // Reserve the top-center focus panel so compact labels never cover it.
         if (focus != null) {
-            String title = titleFor(focus);
+            String title = capitalize(focus.color().getName()) + " chalk • " + focus.ownerName();
             String detail = focus.measurement().label();
             if (detail.length() > 92) detail = detail.substring(0, 91) + "…";
             int focusWidth = Math.max(font.width(title), font.width(detail)) + 12;
@@ -184,7 +181,7 @@ public final class PersistentSurveyRenderer {
                                            Minecraft minecraft,
                                            ChalkMark focus) {
         var font = minecraft.font;
-        String title = titleFor(focus);
+        String title = capitalize(focus.color().getName()) + " chalk • " + focus.ownerName();
         String detail = focus.measurement().label();
         if (detail.length() > 92) detail = detail.substring(0, 91) + "…";
 
@@ -394,10 +391,10 @@ public final class PersistentSurveyRenderer {
         return new ScreenPoint(x, y);
     }
 
-    private static String compactLabel(MeasurementSnapshot snapshot, boolean glowing) {
+    private static String compactLabel(MeasurementSnapshot snapshot) {
         List<BlockPos> points = snapshot.points();
 
-        String base = switch (snapshot.mode()) {
+        return switch (snapshot.mode()) {
             case DISTANCE -> {
                 if (points.size() < 2) yield "Distance";
                 yield "Distance " + fmtCompact(blockDeltaDistance(points.get(0), points.get(1))) + " b";
@@ -422,21 +419,6 @@ public final class PersistentSurveyRenderer {
             }
             case CENTER -> "Center";
         };
-        return glowing ? "Glow • " + base : base;
-    }
-
-    private static String titleFor(ChalkMark mark) {
-        String prefix = mark.glowing() ? "Glow " : "";
-        return prefix + capitalize(mark.color().getName()) + " chalk • " + mark.ownerName();
-    }
-
-    private static int accentArgb(ChalkMark mark) {
-        int base = argb(mark.color());
-        if (!mark.glowing()) return base;
-        int r = Math.min(255, ((base >> 16) & 0xFF) + 34);
-        int g = Math.min(255, ((base >> 8) & 0xFF) + 34);
-        int b = Math.min(255, (base & 0xFF) + 34);
-        return (r << 16) | (g << 8) | b;
     }
 
     private static String rectangleCompact(List<BlockPos> points) {

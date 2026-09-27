@@ -5,7 +5,6 @@ import com.surveyorstoolbox.chalk.ChalkSavedData;
 import com.surveyorstoolbox.client.ChalkClientStore;
 import com.surveyorstoolbox.item.ArchitectsEraserItem;
 import com.surveyorstoolbox.item.ChalkItem;
-import com.surveyorstoolbox.item.GlowChalkItem;
 import com.surveyorstoolbox.measurement.MeasurementSnapshot;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -83,9 +82,7 @@ public final class SurveyNetworking {
             }
 
             case ServerSurveyActionPayload.COMMIT_CHALK -> {
-                boolean colored = held.getItem() instanceof ChalkItem;
-                boolean glow = held.getItem() instanceof GlowChalkItem;
-                if (!colored && !glow) return;
+                if (!(held.getItem() instanceof ChalkItem chalk)) return;
 
                 MeasurementSnapshot snapshot = MeasurementSnapshot.fromTag(payload.data()).compacted();
                 if (!validSnapshotNearPlayer(snapshot, player)) {
@@ -93,43 +90,17 @@ public final class SurveyNetworking {
                     return;
                 }
 
-                ChalkSavedData data = ChalkSavedData.get(player.serverLevel());
-                ChalkSavedData.AddResult result;
-                String savedName = "Glow";
-                if (colored) {
-                    ChalkItem chalk = (ChalkItem) held.getItem();
-                    savedName = capitalize(chalk.color().getName());
-                    result = data.saveColored(player, chalk.color(), snapshot);
-                } else {
-                    result = data.saveGlow(player, snapshot);
-                }
+                ChalkSavedData.AddResult result = ChalkSavedData.get(player.serverLevel())
+                        .add(player, chalk.color(), snapshot);
 
                 switch (result) {
                     case ADDED -> {
                         held.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
-                        if (colored) {
-                            status(player, savedName + " chalk guide saved.", ChatFormatting.GREEN);
-                        } else {
-                            status(player, "Glowing chalk guide saved.", ChatFormatting.GREEN);
-                        }
+                        status(player, capitalize(chalk.color().getName()) + " chalk guide saved.", ChatFormatting.GREEN);
                         syncDimension(player.serverLevel());
                     }
-                    case UPDATED -> {
-                        held.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
-                        if (colored) {
-                            status(player, savedName + " chalk guide updated.", ChatFormatting.GREEN);
-                        } else {
-                            status(player, "Chalk guide is now glowing.", ChatFormatting.GREEN);
-                        }
-                        syncDimension(player.serverLevel());
-                    }
-                    case DUPLICATE -> {
-                        if (colored) {
+                    case DUPLICATE ->
                             status(player, "That measurement is already chalked in this color.", ChatFormatting.GRAY);
-                        } else {
-                            status(player, "That chalk guide is already glowing.", ChatFormatting.GRAY);
-                        }
-                    }
                     case FULL ->
                             status(player, "This dimension has reached its persistent chalk-mark limit.", ChatFormatting.RED);
                     case INVALID ->

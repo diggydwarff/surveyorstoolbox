@@ -3,7 +3,6 @@ package com.surveyorstoolbox.registry;
 import com.surveyorstoolbox.SurveyorsToolbox;
 import com.surveyorstoolbox.item.ArchitectsEraserItem;
 import com.surveyorstoolbox.item.ChalkItem;
-import com.surveyorstoolbox.item.GlowChalkItem;
 import com.surveyorstoolbox.item.SurveyorsRulerItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -23,13 +22,6 @@ public final class ModItems {
     );
 
     public static final Map<DyeColor, DeferredItem<ChalkItem>> CHALKS = new EnumMap<>(DyeColor.class);
-
-
-    public static final DeferredItem<GlowChalkItem> GLOW_CHALK = ITEMS.registerItem(
-            "glow_chalk",
-            GlowChalkItem::new,
-            new Item.Properties().durability(32)
-    );
 
 
     public static final DeferredItem<ArchitectsEraserItem> ARCHITECTS_ERASER = ITEMS.registerItem(
