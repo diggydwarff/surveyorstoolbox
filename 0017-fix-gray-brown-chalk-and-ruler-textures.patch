@@ -1,0 +1,93 @@
+diff --git a/src/main/resources/assets/surveyors_toolbox/models/item/brown_chalk.json b/src/main/resources/assets/surveyors_toolbox/models/item/brown_chalk.json
+index 9d0baa9..c12e8c9 100644
+--- a/src/main/resources/assets/surveyors_toolbox/models/item/brown_chalk.json
++++ b/src/main/resources/assets/surveyors_toolbox/models/item/brown_chalk.json
+@@ -1,6 +1,6 @@
+ {
+   "parent": "minecraft:item/generated",
+   "textures": {
+-    "layer0": "surveyors_toolbox:item/brown_chalk"
++    "layer0": "surveyors_toolbox:item/chalk_brown_v1"
+   }
+ }
+\ No newline at end of file
+diff --git a/src/main/resources/assets/surveyors_toolbox/models/item/gray_chalk.json b/src/main/resources/assets/surveyors_toolbox/models/item/gray_chalk.json
+index 19f1db7..62c5cf8 100644
+--- a/src/main/resources/assets/surveyors_toolbox/models/item/gray_chalk.json
++++ b/src/main/resources/assets/surveyors_toolbox/models/item/gray_chalk.json
+@@ -1,6 +1,6 @@
+ {
+   "parent": "minecraft:item/generated",
+   "textures": {
+-    "layer0": "surveyors_toolbox:item/gray_chalk"
++    "layer0": "surveyors_toolbox:item/chalk_gray_v1"
+   }
+ }
+\ No newline at end of file
+diff --git a/src/main/resources/assets/surveyors_toolbox/models/item/surveyors_ruler.json b/src/main/resources/assets/surveyors_toolbox/models/item/surveyors_ruler.json
+index eaa35bf..8dee235 100644
+--- a/src/main/resources/assets/surveyors_toolbox/models/item/surveyors_ruler.json
++++ b/src/main/resources/assets/surveyors_toolbox/models/item/surveyors_ruler.json
+@@ -1,6 +1,6 @@
+ {
+   "parent": "minecraft:item/generated",
+   "textures": {
+-    "layer0": "surveyors_toolbox:item/surveyors_ruler"
++    "layer0": "surveyors_toolbox:item/surveyors_ruler_v1"
+   }
+ }
+\ No newline at end of file
+diff --git a/src/main/resources/assets/surveyors_toolbox/textures/item/chalk_brown_v1.png b/src/main/resources/assets/surveyors_toolbox/textures/item/chalk_brown_v1.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..b8e06d17d4f48116f405b41b4ef29a1066d3f3a5
+GIT binary patch
+literal 440
+zcmV;p0Z0CcP)<h;3K|Lk000e1NJLTq000mG000mO1^@s6AM^iV0004hNkl<Zc$}@0
+zO>YuW6o#KOjD)lai!#grft^+$E(|d1HhgTr{sNaK{w;rml#SLzms--U6x`aB>3|!P
+zCQYCm7c-rJBeaX&)&0oxp7*@>2oG45Mn{({F~s1<w-2)VCYzuLcH8>)#R3tSFK&4^
+zO7i{dNyHi3;HulvZq`EtM1&`1f;W{pRkx-03Y6<j?Pe#GauyffEU+trX(o96^qO+L
+zts4c(Zd-efPbr^8L@4GgeodxmSa&y-LJ1CLtmj5cyOu{OXT^jsyg+0y%QGGZVXlSv
+zywTKGwjYD<T2NK`p2hg=b3DX~+tDN2r|4LruB^krV47cpBM0TMaxttdBB<&b{Qh!}
+zpXXm<-)`*JTH4EAQLr=7<-c(M%K0x0V2T8GFa6&D6zoj2SB2xL!+3bIap1xXqPd7*
+zfa9sn=yWp-U@Vsl{@l!0BtqN1!|3$Wy`wGw`?Ui-NKZ)bBtfC?WnyV>6##hl@=%S0
+ifnYEietZ!8DC;j%?v+4*NMV2g0000<MNUMnLSTZuY|W$q
+
+literal 0
+HcmV?d00001
+
+diff --git a/src/main/resources/assets/surveyors_toolbox/textures/item/chalk_gray_v1.png b/src/main/resources/assets/surveyors_toolbox/textures/item/chalk_gray_v1.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..34b2bfdf428674900e11020b227f5162b83617fd
+GIT binary patch
+literal 433
+zcmV;i0Z#sjP)<h;3K|Lk000e1NJLTq000mG000mO1^@s6AM^iV0004aNkl<Zc$}?~
+zJ5L)y6otRLJ0L6?J7OQuAfW_o(nR2`L4N#d9#T>U5UCQ#A7Ez|;Zy<P#g}67h$SYb
+z;Ff3RJLl?L;SJO24t2tWKmvZ99LV!GGZ)SV`gv;&5uq$gMEd&k`;j*Z{s(VoLyejS
+z5kW*S#?bk=#&*`%xd!dso~|@Qk~GEI8~_m^G=`1!723N4ebu0y4K)6+NV>X;h>#>H
+z`PCJwRdA!xK+)M9bh>?wnua7zYr2TwY>p}ve;&9zt9qyzY;}7YwH7=)O>{N~1XZxt
+zw_Kio^(A_PPBzr26%xluE!o+;T2_@}RMuc`(C+p$YK0_8>ep3OoVC?2g}nI7?;qc4
+zFo4<I>1*6tAdX@$sw&pzNEM8|8P9|Pj7X)s!T}J+35ByBcB8Q`Y^K3Wp>TG(HEwjz
+z#p&^@FhDSwl-%9j@^n^ontU^!3j+wi=FXlrmtkqC0sMQaxds5AzU*rd1_%KcXNPZs
+b-(?;FViuUGOSt~S00000NkvXXu0mjfN|wM0
+
+literal 0
+HcmV?d00001
+
+diff --git a/src/main/resources/assets/surveyors_toolbox/textures/item/surveyors_ruler_v1.png b/src/main/resources/assets/surveyors_toolbox/textures/item/surveyors_ruler_v1.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..358b77b64dc8c9df89a23f273cb8bc9fb2622682
+GIT binary patch
+literal 451
+zcmV;!0X+VRP)<h;3K|Lk000e1NJLTq000mG000mO1^@s6AM^iV0004QNkl<ZI8T+6
+zy-Px26vlsd%hsl@H8!+pQ)p1MC?*X;4J{3!<s1>!ACMLmIFt%yA2bv#En!kl7DP6r
+z7XAn6)|gG5cyIXCm)GBL;XU_#p7R_yuST2LEQltMe@9bi<6{=P1&Jg^aP;@#a3%~B
+z(*^^b$l;=!rQIu*Hivo0+;DPeGJ&TXS(|es2-&A1=l3s+j>GAZ34<{!67stMVR<jj
+zghOX1Swb`@R9cMSwIZv5FLAa|M1XjzM6ObA{HH-xtYQbY(gfXBVyPE$Z_S!t4ZOW7
+zc70~#gXm?Md_(6dKMLL+BouIi2=no4riOH4-(ok?R8+CU0T&;t^K(&o5KES7OY<AG
+zA6^{^&wkCkvX{o^)QMjFFIH%_4y30G!hV;rqyCLFL66RMvP7YUSfSZFkh|L%CVdC^
+z2D^>ocCu_rtS}5B`@^V}SYOCceyu+gGZ+_@$<#EQ9m8WAVnyw;GHIuCl}|!XlYi3a
+tsgVEx01#wlLPteIIWsdxLO4M%F-1c%Mni58O?3bO002ovPDHLkV1h{Nyh{K8
+
+literal 0
+HcmV?d00001
+

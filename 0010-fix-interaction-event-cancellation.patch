@@ -1,0 +1,18 @@
+diff --git a/src/main/java/com/surveyorstoolbox/event/CommonInteractionEvents.java b/src/main/java/com/surveyorstoolbox/event/CommonInteractionEvents.java
+index 627bb7a..50b3fe3 100644
+--- a/src/main/java/com/surveyorstoolbox/event/CommonInteractionEvents.java
++++ b/src/main/java/com/surveyorstoolbox/event/CommonInteractionEvents.java
+@@ -96,7 +96,12 @@ public final class CommonInteractionEvents {
+         }
+     }
+ 
+-    private static void cancel(PlayerInteractEvent event) {
++    private static void cancel(PlayerInteractEvent.RightClickBlock event) {
++        event.setCancellationResult(InteractionResult.SUCCESS);
++        event.setCanceled(true);
++    }
++
++    private static void cancel(PlayerInteractEvent.RightClickItem event) {
+         event.setCancellationResult(InteractionResult.SUCCESS);
+         event.setCanceled(true);
+     }

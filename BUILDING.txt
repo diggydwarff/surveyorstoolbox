@@ -1,0 +1,8 @@
+Complete source project.
+
+The Gradle wrapper binary JAR is not generated here. Either:
+1. Open with local Gradle 9.2.1, or
+2. Copy gradle-wrapper.jar plus gradlew / gradlew.bat from the official NeoForge 1.21.1 ModDevGradle MDK.
+
+Then run:
+gradle build

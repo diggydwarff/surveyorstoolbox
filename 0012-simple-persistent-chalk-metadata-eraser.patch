@@ -1,0 +1,939 @@
+diff --git a/gradle.properties b/gradle.properties
+index bb0af2d..40067ff 100644
+--- a/gradle.properties
++++ b/gradle.properties
+@@ -12,5 +12,5 @@ mod_name=Surveyor's Toolbox
+ mod_license=MIT
+ mod_version=0.1.0-alpha.3
+ mod_group_id=com.surveyorstoolbox
+-mod_authors=Griffin
+-mod_description=A lightweight building and surveying toolkit for measuring distance, area, volume, slope, boundaries, and interiors.
++mod_authors=diggydwarff
++mod_description=Practical surveying tools for measuring distance, area, volume, slopes, boundaries, and interiors, with persistent colored chalk guides for planning builds.
+diff --git a/src/main/java/com/surveyorstoolbox/SurveyorsToolbox.java b/src/main/java/com/surveyorstoolbox/SurveyorsToolbox.java
+index 3efb19e..f60efcf 100644
+--- a/src/main/java/com/surveyorstoolbox/SurveyorsToolbox.java
++++ b/src/main/java/com/surveyorstoolbox/SurveyorsToolbox.java
+@@ -20,9 +20,7 @@ public final class SurveyorsToolbox {
+     private void addCreativeTabContents(BuildCreativeModeTabContentsEvent event) {
+         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
+             event.accept(ModItems.SURVEYORS_RULER.get());
+-            event.accept(ModItems.ARCHITECTS_GOGGLES.get());
+             event.accept(ModItems.ARCHITECTS_ERASER.get());
+-            event.accept(ModItems.ARCHITECTS_BLUEPRINT.get());
+             ModItems.CHALKS.values().forEach(item -> event.accept(item.get()));
+         }
+     }
+diff --git a/src/main/java/com/surveyorstoolbox/blueprint/BlueprintData.java b/src/main/java/com/surveyorstoolbox/blueprint/BlueprintData.java
+deleted file mode 100644
+index 744836a..0000000
+--- a/src/main/java/com/surveyorstoolbox/blueprint/BlueprintData.java
++++ /dev/null
+@@ -1,93 +0,0 @@
+-package com.surveyorstoolbox.blueprint;
+-
+-import com.surveyorstoolbox.measurement.MeasurementSnapshot;
+-import net.minecraft.core.component.DataComponents;
+-import net.minecraft.nbt.CompoundTag;
+-import net.minecraft.nbt.ListTag;
+-import net.minecraft.nbt.Tag;
+-import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.item.component.CustomData;
+-
+-import java.util.ArrayList;
+-import java.util.List;
+-import java.util.UUID;
+-
+-public final class BlueprintData {
+-    private static final String ROOT_KEY = "SurveyorsToolboxBlueprint";
+-    private static final int MAX_MEASUREMENTS = 12;
+-
+-    public static boolean append(ItemStack stack, String dimension, MeasurementSnapshot snapshot) {
+-        if (!snapshot.isValidForPersistence()) return false;
+-
+-        CompoundTag root = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+-        CompoundTag blueprint = root.getCompound(ROOT_KEY);
+-
+-        if (!blueprint.hasUUID("Id")) {
+-            blueprint.putUUID("Id", UUID.randomUUID());
+-        }
+-
+-        ListTag entries = blueprint.getList("Entries", Tag.TAG_COMPOUND);
+-        if (entries.size() >= MAX_MEASUREMENTS) return false;
+-
+-        MeasurementSnapshot compact = snapshot.compacted();
+-        for (int i = 0; i < entries.size(); i++) {
+-            CompoundTag existing = entries.getCompound(i);
+-            if (!dimension.equals(existing.getString("Dimension"))) continue;
+-            if (!existing.contains("Measurement")) continue;
+-
+-            MeasurementSnapshot existingSnapshot = MeasurementSnapshot.fromTag(existing.getCompound("Measurement"));
+-            if (compact.equals(existingSnapshot)) {
+-                return false;
+-            }
+-        }
+-
+-        CompoundTag entry = new CompoundTag();
+-        entry.putString("Dimension", dimension);
+-        entry.put("Measurement", compact.toTag());
+-        entries.add(entry);
+-
+-        blueprint.put("Entries", entries);
+-        root.put(ROOT_KEY, blueprint);
+-        CustomData.set(DataComponents.CUSTOM_DATA, stack, root);
+-        return true;
+-    }
+-
+-    public static UUID getId(ItemStack stack) {
+-        CompoundTag blueprint = getBlueprintTag(stack);
+-        return blueprint.hasUUID("Id") ? blueprint.getUUID("Id") : null;
+-    }
+-
+-    public static int countMeasurements(ItemStack stack) {
+-        return getBlueprintTag(stack).getList("Entries", Tag.TAG_COMPOUND).size();
+-    }
+-
+-    public static List<MeasurementSnapshot> readMeasurements(ItemStack stack, String dimension) {
+-        CompoundTag blueprint = getBlueprintTag(stack);
+-        ListTag entries = blueprint.getList("Entries", Tag.TAG_COMPOUND);
+-        List<MeasurementSnapshot> out = new ArrayList<>(entries.size());
+-
+-        for (int i = 0; i < entries.size(); i++) {
+-            CompoundTag entry = entries.getCompound(i);
+-
+-            // Alpha.9 stores an explicit dimension with each measurement.
+-            // Direct measurement tags are accepted as a small compatibility fallback.
+-            if (entry.contains("Measurement")) {
+-                if (!dimension.equals(entry.getString("Dimension"))) continue;
+-                MeasurementSnapshot snapshot = MeasurementSnapshot.fromTag(entry.getCompound("Measurement"));
+-                if (snapshot.isValidForPersistence()) out.add(snapshot);
+-            } else {
+-                MeasurementSnapshot snapshot = MeasurementSnapshot.fromTag(entry);
+-                if (snapshot.isValidForPersistence()) out.add(snapshot);
+-            }
+-        }
+-
+-        return List.copyOf(out);
+-    }
+-
+-    private static CompoundTag getBlueprintTag(ItemStack stack) {
+-        CompoundTag root = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+-        return root.getCompound(ROOT_KEY);
+-    }
+-
+-    private BlueprintData() { }
+-}
+diff --git a/src/main/java/com/surveyorstoolbox/client/BlueprintOverlayManager.java b/src/main/java/com/surveyorstoolbox/client/BlueprintOverlayManager.java
+deleted file mode 100644
+index b9d0d8f..0000000
+--- a/src/main/java/com/surveyorstoolbox/client/BlueprintOverlayManager.java
++++ /dev/null
+@@ -1,67 +0,0 @@
+-package com.surveyorstoolbox.client;
+-
+-import com.surveyorstoolbox.blueprint.BlueprintData;
+-import com.surveyorstoolbox.measurement.MeasurementSnapshot;
+-import net.minecraft.ChatFormatting;
+-import net.minecraft.network.chat.Component;
+-import net.minecraft.world.entity.player.Player;
+-import net.minecraft.world.level.Level;
+-import net.minecraft.world.item.ItemStack;
+-
+-import java.util.LinkedHashMap;
+-import java.util.List;
+-import java.util.Map;
+-import java.util.UUID;
+-
+-public final class BlueprintOverlayManager {
+-    private static final int MAX_ACTIVE_BLUEPRINTS = 4;
+-    private static final Map<UUID, List<MeasurementSnapshot>> ACTIVE = new LinkedHashMap<>();
+-    private static Level activeLevel;
+-
+-    public static void tick(Player player) {
+-        if (activeLevel != player.level()) {
+-            ACTIVE.clear();
+-            activeLevel = player.level();
+-        }
+-    }
+-
+-    public static void toggle(ItemStack stack, Player player) {
+-        tick(player);
+-        UUID id = BlueprintData.getId(stack);
+-        String dimension = player.level().dimension().location().toString();
+-        List<MeasurementSnapshot> measurements = BlueprintData.readMeasurements(stack, dimension);
+-        if (id == null || measurements.isEmpty()) {
+-            player.displayClientMessage(Component.literal("This blueprint has no saved measurements for this dimension.")
+-                    .withStyle(ChatFormatting.GRAY), true);
+-            return;
+-        }
+-
+-        if (ACTIVE.remove(id) != null) {
+-            player.displayClientMessage(Component.literal("Blueprint hidden.")
+-                    .withStyle(ChatFormatting.GRAY), true);
+-            return;
+-        }
+-
+-        if (ACTIVE.size() >= MAX_ACTIVE_BLUEPRINTS) {
+-            UUID oldest = ACTIVE.keySet().iterator().next();
+-            ACTIVE.remove(oldest);
+-            player.displayClientMessage(Component.literal("Oldest visible blueprint hidden to reduce clutter.")
+-                    .withStyle(ChatFormatting.GRAY), true);
+-        }
+-
+-        ACTIVE.put(id, measurements);
+-        player.displayClientMessage(Component.literal("Blueprint visible: " + measurements.size() + " measurements.")
+-                .withStyle(ChatFormatting.AQUA), true);
+-    }
+-
+-    public static List<MeasurementSnapshot> visibleMeasurements() {
+-        return ACTIVE.values().stream().flatMap(List::stream).toList();
+-    }
+-
+-    public static void clear() {
+-        ACTIVE.clear();
+-        activeLevel = null;
+-    }
+-
+-    private BlueprintOverlayManager() { }
+-}
+diff --git a/src/main/java/com/surveyorstoolbox/client/ChalkClientStore.java b/src/main/java/com/surveyorstoolbox/client/ChalkClientStore.java
+index e9d57ea..f4e6d53 100644
+--- a/src/main/java/com/surveyorstoolbox/client/ChalkClientStore.java
++++ b/src/main/java/com/surveyorstoolbox/client/ChalkClientStore.java
+@@ -2,11 +2,9 @@ package com.surveyorstoolbox.client;
+ 
+ import com.surveyorstoolbox.chalk.ChalkMark;
+ import com.surveyorstoolbox.network.ServerSurveyActionPayload;
+-import com.surveyorstoolbox.registry.ModItems;
+ import net.minecraft.nbt.CompoundTag;
+ import net.minecraft.nbt.ListTag;
+ import net.minecraft.nbt.Tag;
+-import net.minecraft.world.entity.EquipmentSlot;
+ import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.phys.Vec3;
+@@ -23,7 +21,6 @@ public final class ChalkClientStore {
+     private static Level activeLevel;
+     private static Vec3 lastRequestPosition;
+     private static long lastRequestGameTime = Long.MIN_VALUE;
+-    private static boolean wasWearing;
+ 
+     public static void tick(Player player) {
+         if (activeLevel != player.level()) {
+@@ -31,13 +28,6 @@ public final class ChalkClientStore {
+             MARKS.clear();
+             lastRequestPosition = null;
+             lastRequestGameTime = Long.MIN_VALUE;
+-            wasWearing = false;
+-        }
+-
+-        boolean wearing = isWearingGoggles(player);
+-        if (!wearing) {
+-            wasWearing = false;
+-            return;
+         }
+ 
+         long now = player.level().getGameTime();
+@@ -45,17 +35,11 @@ public final class ChalkClientStore {
+                 || player.position().distanceToSqr(lastRequestPosition) > 24.0D * 24.0D;
+         boolean stale = now - lastRequestGameTime >= 100L;
+ 
+-        if (!wasWearing || moved || stale) {
++        if (lastRequestPosition == null || moved || stale) {
+             PacketDistributor.sendToServer(ServerSurveyActionPayload.requestSync());
+             lastRequestPosition = player.position();
+             lastRequestGameTime = now;
+         }
+-
+-        wasWearing = true;
+-    }
+-
+-    public static boolean isWearingGoggles(Player player) {
+-        return player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.ARCHITECTS_GOGGLES.get());
+     }
+ 
+     public static void applySync(CompoundTag tag) {
+@@ -82,7 +66,6 @@ public final class ChalkClientStore {
+         activeLevel = null;
+         lastRequestPosition = null;
+         lastRequestGameTime = Long.MIN_VALUE;
+-        wasWearing = false;
+     }
+ 
+     private ChalkClientStore() { }
+diff --git a/src/main/java/com/surveyorstoolbox/client/ClientEvents.java b/src/main/java/com/surveyorstoolbox/client/ClientEvents.java
+index c933ced..ffaa85c 100644
+--- a/src/main/java/com/surveyorstoolbox/client/ClientEvents.java
++++ b/src/main/java/com/surveyorstoolbox/client/ClientEvents.java
+@@ -17,7 +17,6 @@ public final class ClientEvents {
+     public static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
+         SurveyManager.clearForDisconnect();
+         ChalkClientStore.clear();
+-        BlueprintOverlayManager.clear();
+     }
+ 
+     @SubscribeEvent
+@@ -29,7 +28,6 @@ public final class ClientEvents {
+         SurveyManager.ensureLevel(player);
+         SurveyManager.tickDisplay(player);
+         ChalkClientStore.tick(player);
+-        BlueprintOverlayManager.tick(player);
+ 
+         // Once a walk survey has started, keep sampling movement even if the player
+         // temporarily changes hotbar slots. Otherwise returning to the ruler would
+diff --git a/src/main/java/com/surveyorstoolbox/client/ClientItemProperties.java b/src/main/java/com/surveyorstoolbox/client/ClientItemProperties.java
+deleted file mode 100644
+index 94a261f..0000000
+--- a/src/main/java/com/surveyorstoolbox/client/ClientItemProperties.java
++++ /dev/null
+@@ -1,25 +0,0 @@
+-package com.surveyorstoolbox.client;
+-
+-import com.surveyorstoolbox.SurveyorsToolbox;
+-import com.surveyorstoolbox.blueprint.BlueprintData;
+-import com.surveyorstoolbox.registry.ModItems;
+-import net.minecraft.client.renderer.item.ItemProperties;
+-import net.minecraft.resources.ResourceLocation;
+-import net.neoforged.api.distmarker.Dist;
+-import net.neoforged.bus.api.SubscribeEvent;
+-import net.neoforged.fml.common.EventBusSubscriber;
+-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+-
+-@EventBusSubscriber(modid = SurveyorsToolbox.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+-public final class ClientItemProperties {
+-    @SubscribeEvent
+-    public static void onClientSetup(FMLClientSetupEvent event) {
+-        event.enqueueWork(() -> ItemProperties.register(
+-                ModItems.ARCHITECTS_BLUEPRINT.get(),
+-                ResourceLocation.fromNamespaceAndPath(SurveyorsToolbox.MOD_ID, "filled_blueprint"),
+-                (stack, level, entity, seed) -> BlueprintData.countMeasurements(stack) > 0 ? 1.0F : 0.0F
+-        ));
+-    }
+-
+-    private ClientItemProperties() { }
+-}
+diff --git a/src/main/java/com/surveyorstoolbox/client/PersistentSurveyRenderer.java b/src/main/java/com/surveyorstoolbox/client/PersistentSurveyRenderer.java
+index e0034e1..1782356 100644
+--- a/src/main/java/com/surveyorstoolbox/client/PersistentSurveyRenderer.java
++++ b/src/main/java/com/surveyorstoolbox/client/PersistentSurveyRenderer.java
+@@ -65,9 +65,7 @@ public final class PersistentSurveyRenderer {
+         Minecraft minecraft = Minecraft.getInstance();
+         if (minecraft.player == null || minecraft.level == null) return;
+ 
+-        boolean goggles = ChalkClientStore.isWearingGoggles(minecraft.player);
+-        List<MeasurementSnapshot> blueprints = BlueprintOverlayManager.visibleMeasurements();
+-        if (!goggles && blueprints.isEmpty()) return;
++        if (ChalkClientStore.marks().isEmpty()) return;
+ 
+         Camera camera = event.getCamera();
+         Vec3 cameraPos = camera.getPosition();
+@@ -77,27 +75,18 @@ public final class PersistentSurveyRenderer {
+         poseStack.pushPose();
+         poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+ 
+-        if (goggles) {
+-            List<ChalkMark> visible = ChalkClientStore.marks().stream()
++        List<ChalkMark> visible = ChalkClientStore.marks().stream()
+                     .filter(mark -> mark.measurement().distanceTo(cameraPos) <= CHALK_RENDER_DISTANCE)
+                     .sorted(Comparator.comparingDouble(mark -> mark.measurement().distanceTo(cameraPos)))
+                     .limit(MAX_RENDERED_CHALK_MARKS)
+                     .toList();
+ 
+-            for (ChalkMark mark : visible) {
+-                double distance = mark.measurement().distanceTo(cameraPos);
+-                float brightness = distance <= CHALK_FULL_DISTANCE
+-                        ? 1.0f
+-                        : (float) Math.max(0.42D, 1.0D - (distance - CHALK_FULL_DISTANCE) / 90.0D);
+-                renderSnapshot(poseStack, mark.measurement(), color(mark.color(), brightness), 0.34f * brightness);
+-            }
+-        }
+-
+-        NeonColor blueprintColor = new NeonColor(0.28f, 0.72f, 1.00f);
+-        for (MeasurementSnapshot snapshot : blueprints) {
+-            if (snapshot.distanceTo(cameraPos) <= CHALK_RENDER_DISTANCE) {
+-                renderSnapshot(poseStack, snapshot, blueprintColor, 0.42f);
+-            }
++        for (ChalkMark mark : visible) {
++            double distance = mark.measurement().distanceTo(cameraPos);
++            float brightness = distance <= CHALK_FULL_DISTANCE
++                    ? 1.0f
++                    : (float) Math.max(0.42D, 1.0D - (distance - CHALK_FULL_DISTANCE) / 90.0D);
++            renderSnapshot(poseStack, mark.measurement(), color(mark.color(), brightness), 0.34f * brightness);
+         }
+ 
+         BUFFERS.endBatch();
+@@ -109,9 +98,7 @@ public final class PersistentSurveyRenderer {
+         Minecraft minecraft = Minecraft.getInstance();
+         if (minecraft.player == null || minecraft.level == null) return;
+ 
+-        boolean goggles = ChalkClientStore.isWearingGoggles(minecraft.player);
+-        List<MeasurementSnapshot> blueprints = BlueprintOverlayManager.visibleMeasurements();
+-        if (!goggles && blueprints.isEmpty()) return;
++        if (ChalkClientStore.marks().isEmpty()) return;
+ 
+         var graphics = event.getGuiGraphics();
+         var font = minecraft.font;
+@@ -122,8 +109,7 @@ public final class PersistentSurveyRenderer {
+ 
+         List<LabelCandidate> candidates = new ArrayList<>();
+ 
+-        if (goggles) {
+-            for (ChalkMark mark : ChalkClientStore.marks()) {
++        for (ChalkMark mark : ChalkClientStore.marks()) {
+                 MeasurementSnapshot snapshot = mark.measurement();
+                 double distance = snapshot.distanceTo(cameraPos);
+                 if (distance > LABEL_RENDER_DISTANCE) continue;
+@@ -138,35 +124,14 @@ public final class PersistentSurveyRenderer {
+                         anchor,
+                         direction,
+                         distance,
+-                        argb(mark.color()),
+-                        false
++                        argb(mark.color())
+                 ));
+             }
+-        }
+-
+-        for (MeasurementSnapshot snapshot : blueprints) {
+-            double distance = snapshot.distanceTo(cameraPos);
+-            if (distance > LABEL_RENDER_DISTANCE) continue;
+-
+-            LabelGeometry geometry = labelGeometry(snapshot, cameraPos);
+-            ScreenPoint anchor = projectToScreen(geometry.anchor(), camera, guiWidth, guiHeight, minecraft);
+-            if (anchor == null) continue;
+-
+-            ScreenDirection direction = projectDirection(geometry, camera, guiWidth, guiHeight, minecraft);
+-            candidates.add(new LabelCandidate(
+-                    compactLabel(snapshot),
+-                    anchor,
+-                    direction,
+-                    distance,
+-                    0xFF66C9FF,
+-                    true
+-            ));
+-        }
+ 
+         candidates.sort(Comparator.comparingDouble(LabelCandidate::distance));
+ 
+         List<ScreenRect> occupied = new ArrayList<>();
+-        ChalkMark focus = goggles ? focusedMark(minecraft) : null;
++        ChalkMark focus = focusedMark(minecraft);
+ 
+         // Reserve the top-center focus panel so compact labels never cover it.
+         if (focus != null) {
+@@ -194,7 +159,7 @@ public final class PersistentSurveyRenderer {
+             int backgroundAlpha = candidate.distance() <= 32.0D ? 0xB8 : 0x96;
+             int background = (backgroundAlpha << 24) | 0x101512;
+             int accent = (0xDD << 24) | (candidate.accentArgb() & 0x00FFFFFF);
+-            int textColor = candidate.blueprint() ? 0xFFE7F7FF : 0xFFF0FFF2;
++            int textColor = 0xFFF0FFF2;
+ 
+             graphics.fill(placement.left(), placement.top(), placement.right(), placement.bottom(), background);
+             graphics.fill(placement.left(), placement.top(), placement.right(), placement.top() + 1, accent);
+@@ -822,8 +787,7 @@ public final class PersistentSurveyRenderer {
+                                   ScreenPoint anchor,
+                                   ScreenDirection direction,
+                                   double distance,
+-                                  int accentArgb,
+-                                  boolean blueprint) { }
++                                  int accentArgb) { }
+ 
+     private record Segment(Vec3 a, Vec3 b) { }
+     private record NeonColor(float r, float g, float b) { }
+diff --git a/src/main/java/com/surveyorstoolbox/client/SurveyClientActions.java b/src/main/java/com/surveyorstoolbox/client/SurveyClientActions.java
+index 19ed301..783ba58 100644
+--- a/src/main/java/com/surveyorstoolbox/client/SurveyClientActions.java
++++ b/src/main/java/com/surveyorstoolbox/client/SurveyClientActions.java
+@@ -7,7 +7,6 @@ import net.minecraft.ChatFormatting;
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.world.InteractionHand;
+ import net.minecraft.world.entity.player.Player;
+-import net.minecraft.world.item.ItemStack;
+ import net.neoforged.neoforge.network.PacketDistributor;
+ 
+ public final class SurveyClientActions {
+@@ -24,22 +23,7 @@ public final class SurveyClientActions {
+         PacketDistributor.sendToServer(ServerSurveyActionPayload.commit(hand, snapshot.toTag()));
+     }
+ 
+-    public static void saveBlueprint(Player player, InteractionHand hand) {
+-        MeasurementSnapshot snapshot = SurveyManager.snapshotForPersistence();
+-        if (snapshot == null) {
+-            status(player, "Finish a measurement before adding it to a blueprint.", ChatFormatting.GRAY);
+-            return;
+-        }
+-        if (!snapshot.isValidForPersistence()) {
+-            status(player, "This measurement is too large to save.", ChatFormatting.YELLOW);
+-            return;
+-        }
+-        PacketDistributor.sendToServer(ServerSurveyActionPayload.saveBlueprint(hand, snapshot.toTag()));
+-    }
+ 
+-    public static void toggleBlueprint(Player player, ItemStack stack) {
+-        BlueprintOverlayManager.toggle(stack, player);
+-    }
+ 
+     public static void eraseNearest(InteractionHand hand, long clickedPos) {
+         PacketDistributor.sendToServer(ServerSurveyActionPayload.erase(hand, clickedPos));
+diff --git a/src/main/java/com/surveyorstoolbox/event/CommonInteractionEvents.java b/src/main/java/com/surveyorstoolbox/event/CommonInteractionEvents.java
+index 50b3fe3..9503f0e 100644
+--- a/src/main/java/com/surveyorstoolbox/event/CommonInteractionEvents.java
++++ b/src/main/java/com/surveyorstoolbox/event/CommonInteractionEvents.java
+@@ -2,7 +2,6 @@ package com.surveyorstoolbox.event;
+ 
+ import com.surveyorstoolbox.SurveyorsToolbox;
+ import com.surveyorstoolbox.client.SurveyClientActions;
+-import com.surveyorstoolbox.item.ArchitectsBlueprintItem;
+ import com.surveyorstoolbox.item.ArchitectsEraserItem;
+ import com.surveyorstoolbox.item.ChalkItem;
+ import com.surveyorstoolbox.measurement.SurveyManager;
+@@ -44,16 +43,6 @@ public final class CommonInteractionEvents {
+             return;
+         }
+ 
+-        if (event.getItemStack().getItem() instanceof ArchitectsBlueprintItem) {
+-            if (event.getEntity().level().isClientSide()) {
+-                if (event.getEntity().isShiftKeyDown()) {
+-                    SurveyClientActions.saveBlueprint(event.getEntity(), event.getHand());
+-                } else {
+-                    SurveyClientActions.toggleBlueprint(event.getEntity(), event.getItemStack());
+-                }
+-            }
+-            cancel(event);
+-        }
+     }
+ 
+     @SubscribeEvent
+@@ -84,16 +73,6 @@ public final class CommonInteractionEvents {
+             return;
+         }
+ 
+-        if (event.getItemStack().getItem() instanceof ArchitectsBlueprintItem) {
+-            if (event.getEntity().level().isClientSide()) {
+-                if (event.getEntity().isShiftKeyDown()) {
+-                    SurveyClientActions.saveBlueprint(event.getEntity(), event.getHand());
+-                } else {
+-                    SurveyClientActions.toggleBlueprint(event.getEntity(), event.getItemStack());
+-                }
+-            }
+-            cancel(event);
+-        }
+     }
+ 
+     private static void cancel(PlayerInteractEvent.RightClickBlock event) {
+diff --git a/src/main/java/com/surveyorstoolbox/item/ArchitectsBlueprintItem.java b/src/main/java/com/surveyorstoolbox/item/ArchitectsBlueprintItem.java
+deleted file mode 100644
+index b7b673f..0000000
+--- a/src/main/java/com/surveyorstoolbox/item/ArchitectsBlueprintItem.java
++++ /dev/null
+@@ -1,26 +0,0 @@
+-package com.surveyorstoolbox.item;
+-
+-import com.surveyorstoolbox.blueprint.BlueprintData;
+-import net.minecraft.ChatFormatting;
+-import net.minecraft.network.chat.Component;
+-import net.minecraft.world.item.Item;
+-import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.item.TooltipFlag;
+-
+-import java.util.List;
+-
+-public final class ArchitectsBlueprintItem extends Item {
+-    public ArchitectsBlueprintItem(Properties properties) {
+-        super(properties);
+-    }
+-
+-    @Override
+-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+-        int count = BlueprintData.countMeasurements(stack);
+-        tooltip.add(Component.literal("Measurements: " + count).withStyle(ChatFormatting.BLUE));
+-        tooltip.add(Component.literal("Sneak + right-click after measuring to add it.")
+-                .withStyle(ChatFormatting.GRAY));
+-        tooltip.add(Component.literal("Right-click to toggle this blueprint's holograms.")
+-                .withStyle(ChatFormatting.DARK_GRAY));
+-    }
+-}
+diff --git a/src/main/java/com/surveyorstoolbox/item/ArchitectsGogglesItem.java b/src/main/java/com/surveyorstoolbox/item/ArchitectsGogglesItem.java
+deleted file mode 100644
+index 4b3ee0c..0000000
+--- a/src/main/java/com/surveyorstoolbox/item/ArchitectsGogglesItem.java
++++ /dev/null
+@@ -1,25 +0,0 @@
+-package com.surveyorstoolbox.item;
+-
+-import net.minecraft.ChatFormatting;
+-import net.minecraft.network.chat.Component;
+-import net.minecraft.world.item.ArmorItem;
+-import net.minecraft.world.item.ArmorMaterial;
+-import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.item.TooltipFlag;
+-import net.minecraft.core.Holder;
+-
+-import java.util.List;
+-
+-public final class ArchitectsGogglesItem extends ArmorItem {
+-    public ArchitectsGogglesItem(Holder<ArmorMaterial> material, Properties properties) {
+-        super(material, Type.HELMET, properties);
+-    }
+-
+-    @Override
+-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+-        tooltip.add(Component.literal("Reveals nearby persistent chalk surveys.")
+-                .withStyle(ChatFormatting.GRAY));
+-        tooltip.add(Component.literal("Nearby surveys get compact labels; focus one for full details.")
+-                .withStyle(ChatFormatting.DARK_GRAY));
+-    }
+-}
+diff --git a/src/main/java/com/surveyorstoolbox/network/ServerSurveyActionPayload.java b/src/main/java/com/surveyorstoolbox/network/ServerSurveyActionPayload.java
+index a1422c5..9c82996 100644
+--- a/src/main/java/com/surveyorstoolbox/network/ServerSurveyActionPayload.java
++++ b/src/main/java/com/surveyorstoolbox/network/ServerSurveyActionPayload.java
+@@ -14,7 +14,6 @@ public record ServerSurveyActionPayload(int action, int hand, CompoundTag data)
+     public static final int COMMIT_CHALK = 1;
+     public static final int ERASE_NEAREST = 2;
+     public static final int CLEAR_OWN_CHALK = 3;
+-    public static final int SAVE_BLUEPRINT = 4;
+ 
+     public static final Type<ServerSurveyActionPayload> TYPE = new Type<>(
+             ResourceLocation.fromNamespaceAndPath(SurveyorsToolbox.MOD_ID, "survey_action")
+@@ -46,9 +45,6 @@ public record ServerSurveyActionPayload(int action, int hand, CompoundTag data)
+         return new ServerSurveyActionPayload(CLEAR_OWN_CHALK, hand == InteractionHand.MAIN_HAND ? 0 : 1, new CompoundTag());
+     }
+ 
+-    public static ServerSurveyActionPayload saveBlueprint(InteractionHand hand, CompoundTag measurement) {
+-        return new ServerSurveyActionPayload(SAVE_BLUEPRINT, hand == InteractionHand.MAIN_HAND ? 0 : 1, measurement);
+-    }
+ 
+     @Override
+     public Type<? extends CustomPacketPayload> type() {
+diff --git a/src/main/java/com/surveyorstoolbox/network/SurveyNetworking.java b/src/main/java/com/surveyorstoolbox/network/SurveyNetworking.java
+index 32e7a21..46a627e 100644
+--- a/src/main/java/com/surveyorstoolbox/network/SurveyNetworking.java
++++ b/src/main/java/com/surveyorstoolbox/network/SurveyNetworking.java
+@@ -1,14 +1,11 @@
+ package com.surveyorstoolbox.network;
+ 
+-import com.surveyorstoolbox.blueprint.BlueprintData;
+ import com.surveyorstoolbox.chalk.ChalkMark;
+ import com.surveyorstoolbox.chalk.ChalkSavedData;
+ import com.surveyorstoolbox.client.ChalkClientStore;
+-import com.surveyorstoolbox.item.ArchitectsBlueprintItem;
+ import com.surveyorstoolbox.item.ArchitectsEraserItem;
+ import com.surveyorstoolbox.item.ChalkItem;
+ import com.surveyorstoolbox.measurement.MeasurementSnapshot;
+-import com.surveyorstoolbox.registry.ModItems;
+ import net.minecraft.ChatFormatting;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.nbt.CompoundTag;
+@@ -17,7 +14,6 @@ import net.minecraft.network.chat.Component;
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.server.level.ServerPlayer;
+ import net.minecraft.world.InteractionHand;
+-import net.minecraft.world.entity.EquipmentSlot;
+ import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.phys.Vec3;
+@@ -72,8 +68,6 @@ public final class SurveyNetworking {
+ 
+         switch (payload.action()) {
+             case ServerSurveyActionPayload.REQUEST_SYNC -> {
+-                if (!isWearingGoggles(player)) return;
+-
+                 long now = player.serverLevel().getGameTime();
+                 long previous = LAST_SYNC_REQUEST.getOrDefault(player.getUUID(), Long.MIN_VALUE / 2L);
+                 if (now - previous < MIN_SYNC_REQUEST_TICKS) return;
+@@ -144,22 +138,6 @@ public final class SurveyNetworking {
+                 if (removed > 0) syncDimension(player.serverLevel());
+             }
+ 
+-            case ServerSurveyActionPayload.SAVE_BLUEPRINT -> {
+-                if (!(held.getItem() instanceof ArchitectsBlueprintItem)) return;
+-
+-                MeasurementSnapshot snapshot = MeasurementSnapshot.fromTag(payload.data()).compacted();
+-                if (!validSnapshotNearPlayer(snapshot, player)) {
+-                    status(player, "That measurement cannot be saved from here.", ChatFormatting.YELLOW);
+-                    return;
+-                }
+-
+-                String dimension = player.serverLevel().dimension().location().toString();
+-                if (BlueprintData.append(held, dimension, snapshot)) {
+-                    status(player, "Measurement added to blueprint.", ChatFormatting.AQUA);
+-                } else {
+-                    status(player, "Blueprint is full, duplicated, or the measurement is invalid.", ChatFormatting.YELLOW);
+-                }
+-            }
+ 
+             default -> { }
+         }
+@@ -171,15 +149,10 @@ public final class SurveyNetworking {
+         return Double.isFinite(distance) && distance <= MAX_COMMIT_DISTANCE;
+     }
+ 
+-    private static boolean isWearingGoggles(ServerPlayer player) {
+-        return player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.ARCHITECTS_GOGGLES.get());
+-    }
+ 
+     private static void syncDimension(ServerLevel level) {
+         for (ServerPlayer player : level.players()) {
+-            if (isWearingGoggles(player)) {
+-                sendSync(player);
+-            }
++            sendSync(player);
+         }
+     }
+ 
+diff --git a/src/main/java/com/surveyorstoolbox/registry/ModItems.java b/src/main/java/com/surveyorstoolbox/registry/ModItems.java
+index 8877e1f..bfa3236 100644
+--- a/src/main/java/com/surveyorstoolbox/registry/ModItems.java
++++ b/src/main/java/com/surveyorstoolbox/registry/ModItems.java
+@@ -1,12 +1,9 @@
+ package com.surveyorstoolbox.registry;
+ 
+ import com.surveyorstoolbox.SurveyorsToolbox;
+-import com.surveyorstoolbox.item.ArchitectsBlueprintItem;
+ import com.surveyorstoolbox.item.ArchitectsEraserItem;
+-import com.surveyorstoolbox.item.ArchitectsGogglesItem;
+ import com.surveyorstoolbox.item.ChalkItem;
+ import com.surveyorstoolbox.item.SurveyorsRulerItem;
+-import net.minecraft.world.item.ArmorMaterials;
+ import net.minecraft.world.item.DyeColor;
+ import net.minecraft.world.item.Item;
+ import net.neoforged.neoforge.registries.DeferredItem;
+@@ -26,11 +23,6 @@ public final class ModItems {
+ 
+     public static final Map<DyeColor, DeferredItem<ChalkItem>> CHALKS = new EnumMap<>(DyeColor.class);
+ 
+-    public static final DeferredItem<ArchitectsGogglesItem> ARCHITECTS_GOGGLES = ITEMS.registerItem(
+-            "architects_goggles",
+-            properties -> new ArchitectsGogglesItem(ArmorMaterials.GOLD, properties),
+-            new Item.Properties().stacksTo(1)
+-    );
+ 
+     public static final DeferredItem<ArchitectsEraserItem> ARCHITECTS_ERASER = ITEMS.registerItem(
+             "architects_eraser",
+@@ -38,11 +30,6 @@ public final class ModItems {
+             new Item.Properties().stacksTo(1)
+     );
+ 
+-    public static final DeferredItem<ArchitectsBlueprintItem> ARCHITECTS_BLUEPRINT = ITEMS.registerItem(
+-            "architects_blueprint",
+-            ArchitectsBlueprintItem::new,
+-            new Item.Properties().stacksTo(1)
+-    );
+ 
+     static {
+         for (DyeColor color : DyeColor.values()) {
+diff --git a/src/main/resources/META-INF/neoforge.mods.toml b/src/main/resources/META-INF/neoforge.mods.toml
+index b5967c0..a22929e 100644
+--- a/src/main/resources/META-INF/neoforge.mods.toml
++++ b/src/main/resources/META-INF/neoforge.mods.toml
+@@ -7,6 +7,7 @@ modId="${mod_id}"
+ version="${mod_version}"
+ displayName="${mod_name}"
+ authors="${mod_authors}"
++credits="Built for builders, planners, and large-scale Minecraft projects."
+ description='''${mod_description}'''
+ 
+ [[dependencies.${mod_id}]]
+diff --git a/src/main/resources/assets/surveyors_toolbox/lang/en_us.json b/src/main/resources/assets/surveyors_toolbox/lang/en_us.json
+index bdc7b7b..7076ee9 100644
+--- a/src/main/resources/assets/surveyors_toolbox/lang/en_us.json
++++ b/src/main/resources/assets/surveyors_toolbox/lang/en_us.json
+@@ -3,9 +3,7 @@
+   "key.surveyors_toolbox.next_mode": "Change Ruler Mode",
+   "key.surveyors_toolbox.clear": "Clear Measurement",
+   "key.categories.surveyors_toolbox": "Surveyor's Toolbox",
+-  "item.surveyors_toolbox.architects_goggles": "Architect's Goggles",
+   "item.surveyors_toolbox.architects_eraser": "Architect's Eraser",
+-  "item.surveyors_toolbox.architects_blueprint": "Architect's Blueprint",
+   "item.surveyors_toolbox.white_chalk": "White Chalk",
+   "item.surveyors_toolbox.orange_chalk": "Orange Chalk",
+   "item.surveyors_toolbox.magenta_chalk": "Magenta Chalk",
+diff --git a/src/main/resources/assets/surveyors_toolbox/models/item/architects_blueprint.json b/src/main/resources/assets/surveyors_toolbox/models/item/architects_blueprint.json
+deleted file mode 100644
+index 9cf3f6b..0000000
+--- a/src/main/resources/assets/surveyors_toolbox/models/item/architects_blueprint.json
++++ /dev/null
+@@ -1,14 +0,0 @@
+-{
+-  "parent": "minecraft:item/generated",
+-  "textures": {
+-    "layer0": "surveyors_toolbox:item/architects_blueprint_blank"
+-  },
+-  "overrides": [
+-    {
+-      "predicate": {
+-        "surveyors_toolbox:filled_blueprint": 1.0
+-      },
+-      "model": "surveyors_toolbox:item/architects_blueprint_used"
+-    }
+-  ]
+-}
+\ No newline at end of file
+diff --git a/src/main/resources/assets/surveyors_toolbox/models/item/architects_blueprint_used.json b/src/main/resources/assets/surveyors_toolbox/models/item/architects_blueprint_used.json
+deleted file mode 100644
+index bd8f190..0000000
+--- a/src/main/resources/assets/surveyors_toolbox/models/item/architects_blueprint_used.json
++++ /dev/null
+@@ -1,6 +0,0 @@
+-{
+-  "parent": "minecraft:item/generated",
+-  "textures": {
+-    "layer0": "surveyors_toolbox:item/architects_blueprint_used"
+-  }
+-}
+\ No newline at end of file
+diff --git a/src/main/resources/assets/surveyors_toolbox/models/item/architects_eraser.json b/src/main/resources/assets/surveyors_toolbox/models/item/architects_eraser.json
+index 04f892a..6897bfc 100644
+--- a/src/main/resources/assets/surveyors_toolbox/models/item/architects_eraser.json
++++ b/src/main/resources/assets/surveyors_toolbox/models/item/architects_eraser.json
+@@ -1,6 +1,6 @@
+ {
+   "parent": "minecraft:item/generated",
+   "textures": {
+-    "layer0": "minecraft:item/brush"
++    "layer0": "surveyors_toolbox:item/architects_eraser"
+   }
+ }
+\ No newline at end of file
+diff --git a/src/main/resources/assets/surveyors_toolbox/models/item/architects_goggles.json b/src/main/resources/assets/surveyors_toolbox/models/item/architects_goggles.json
+deleted file mode 100644
+index 86e2cab..0000000
+--- a/src/main/resources/assets/surveyors_toolbox/models/item/architects_goggles.json
++++ /dev/null
+@@ -1,6 +0,0 @@
+-{
+-  "parent": "minecraft:item/generated",
+-  "textures": {
+-    "layer0": "surveyors_toolbox:item/architects_goggles"
+-  }
+-}
+\ No newline at end of file
+diff --git a/src/main/resources/assets/surveyors_toolbox/textures/item/architects_blueprint_blank.png b/src/main/resources/assets/surveyors_toolbox/textures/item/architects_blueprint_blank.png
+deleted file mode 100644
+index 0e1f60607c0557ea27e5336a4d46324b81f4e6f0..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 450
+zcmV;z0X_bSP)<h;3K|Lk000e1NJLTq000mG000mO1^@s6AM^iV0004rNkl<Zc$}q@
+zAxJ|(9EZOrA}on`O|Tk-%>ywgY7i~Ux*!Z>VR0~Q1H-ZmEG8G;YntT+1(}LE#W0lx
+z!Q?qCf7Bs}V0Z?3r*C^pUi{yE-~H~#!9SM+kjv%lpj0XaB7!jn-}jw~=}Z97INx<T
+z;cB%?|KCAApAP_(QYfVWg7K;Oa65>T^u@(;T^9hYwVf?4%@d~SDKN$$BBax4T-QZJ
+zXkP6DaC-e3D~Skv-*=2LD5XdylPIOoTC=fr!tCTwti%c?rZYjfAtGq4sZ=Tetgj6A
+zl=O%2;?hr98(Sx2FgBHlaMK#4T=;=!Cx<vZI7XWHzX_yyPwnEtLN9$Y+_Xk17K?bE
+z$3p6Z)9Y6N3qQ3Rjukw$8_sk6h}y*i<-#0?XLqDV9wTk1MjrWmxsAY)4mu^9du>F-
+zKI8K4tqZmt{FP8Ar~&1|901vD7SHn-9vJI_y9Aw*ulJTMD-Mo4p;Pi)KeCa%ooy0{
+sMAt9uDF`Lut;?%xj<>Vj>*)X1H>yk2UwC)@2LJ#707*qoM6N<$f*0k+LjV8(
+
+diff --git a/src/main/resources/assets/surveyors_toolbox/textures/item/architects_blueprint_used.png b/src/main/resources/assets/surveyors_toolbox/textures/item/architects_blueprint_used.png
+deleted file mode 100644
+index 767f78c14a6464f053ac1a95bb8af6b3211522e2..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 359
+zcmV-t0hs=YP)<h;3K|Lk000e1NJLTq000mG000mO1^@s6AM^iV0003lNkl<Zc%03U
+zze>YU6o<b^7D0y&(nZIP0aGdz41pp-`wAKI3VDRmN9f`MWDws#L4!~t6)dS>hk|Pm
+zN`?k1I5@;1z1RFR4lbVUaL@PMbAIs0QUGk*{&7GztOQ{0Un<2n*L6|r?7Cqk{XtK(
+zNtI-$4%XXU+4l!Mxy`Qv-LR6qgJYV_U54Wc0RC)UDJcmAETEBNG8|7ZI*m$+ngs#$
+zb~pDkXi_qAOep~p*L4+Dz#=RGis9Rb7b)>)Ym82Vo9la`#qxWDXtBiGKjh440dRh*
+z$>G+~2^UvSfCeDpFb))%K^O<h+w>04e`VyD+h5ZRQaG*m=s5@HG6>^9VM^j{*Uz4^
+zT757N9!qdeP$dy7i!+OGNl=u0ZbBJW6<jIEO6tJ>Q(q)9snVJhOXmOp002ovPDHLk
+FV1j<Qlu-Zx
+
+diff --git a/src/main/resources/assets/surveyors_toolbox/textures/item/architects_eraser.png b/src/main/resources/assets/surveyors_toolbox/textures/item/architects_eraser.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..58ba6a6ef284ead20a70c704c489d17718d0b6f9
+GIT binary patch
+literal 303
+zcmeAS@N?(olHy`uVBq!ia0vp^0wB!61|;P_|4#%`-#lF$Ln`JZCrA_>2#S9Ef6mL|
+zfAejNf7;)ib${>wPyg@!*8eXlAt4dbadl5t)$97yV0$(oXe-qYGmw}y%h&(}gck3#
+zGJa;y%*=dvpL4pzq+%}#9^bQ)J-#KKmrf_FT>Ei9Q2PJR=GXrY|2Xl<r^Uqj=1hYZ
+zuQQF-L~iVB1cHY@u1af|J?3Hd&h7o*$!5g!nSX9#0uW@(-N&+e@<y(xtn5GUISdja
+z>OV0yPqW~6zIDmg;&1mu)){9F&c5PO+VLf67s&nlcP?Q7I)gc8bM0%cJqvqH1-2fk
+r1Ug@WBg@T@A<g<sTFpPX7zT#WiM|qIEN89(Lx924)z4*}Q$iB}6#0G|
+
+literal 0
+HcmV?d00001
+
+diff --git a/src/main/resources/assets/surveyors_toolbox/textures/item/architects_goggles.png b/src/main/resources/assets/surveyors_toolbox/textures/item/architects_goggles.png
+deleted file mode 100644
+index 025d3b1f931550566eda8175351528926f94f6b0..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 971
+zcmV;+12p`JP)<h;3K|Lk000e1NJLTq000;O000;W1^@s6;CDUv000A$Nkl<Zc%1E&
+zU2Kz87{`Cl>D#qz>ozjk*0-CCjq0N4m<pLuoGdCD#Tf34Bwj#bL_&-gYW#>mHi#N8
+zNVqVOM6Z#=D?cKr6GgI2Fhef{hO*MGg%xleZE4?+$BT|K;FiS1@K4UgIp=?V&&l(g
+z^S~|r*OK{@n7u@GZb=nD5rp-FHlP1=7GnijyP}D`2Q!FV@l+`4D<Z;F`mbx4RuvxW
+z*2ac~w6?a8OePT#RDJUK0-on#0v5jS1A>U5uCA^MQB`a^N+z8l7VFYf>S_=JU`Ll|
+zs3rt}<N0%Ng}EDwfa{d;T@UpY)yk-*K?E=;!h&!uZ7uE9O$)#n0|>d?47uFQ9Kf$0
+zPMj?;nLH%`nQTZ=C7-{9ASjj8OiY|WL<oh#m_W_7g^1Z*+8*mxZh~TVx7yLJtE^~S
+z*G&OmFT1T%VP25|R`w6-z`$yjE$>B)Vf^TC{CseP(Zk=#^?<>_XVvjMUflc=7Cvhl
+zzGnE7qwL-{CQvOO)|I!m?4Ew@?Yp0o$pop{9GC$4%LRJxTS0buT2D<Js|Jb3`*dkf
+z4+Rkp?EeAZaryqtDBCu5Gj@DdM}PlQu9&To=hD&MqxbebKoMc%2Ro<@2JlrVmdfne
+zHcbCRtMD98J<kP&r`A5hbZ(Y)Z@*4Sp(zyPpQ6i_7gq7{=5E&QL~}D20Wj|k4<QI*
+z46h8mOKYT-+ah72kuV+24Q$`_KE4VfLaco;0m~wL{vumG9AZ&J9ea-aO(Yz|^Wgct
+zhiJ4rsi#Qd*PU!w9aHPa{UeoUs)}U^8$SI8EnfzOV0}GbY<wEebx{S+bpQcl7(aV~
+zvB@k8fZe|wr@1D`>bQ-Q&$Duga$wIc0>;NmOrFMZUCK@w6u#Z`90ng_4Cl%&$7k|b
+zRshd)Nv6(V1uR5hdFw*%jyCevSI2ns;X6rRaBwXpGj*Cnr-RhUG|6+tO5<s6zFi-E
+zd<~)6I<|Z?1o#+*^Mw+hy|W#!T;lM^2&t(P(%jsk15Z3jC=_D-&{nbqhxSN_Kc<U}
+zzWgAU3k41)YRI0S5}4QQVs>2Pcl6NIvWQ51J)Y+?GdoK<kszHsLpn22^|rPx)t<YS
+z(b2gW%L?GS4wsJXW5;XDdF0hGvKO;e?{(cYuEB5^%NP)Y=Xp4#BFWUr8~%YE?bgtO
+tS}M&CzTDc$V{eR;nwq@9drSXw{R<)mgX*T<Vy^%I002ovPDHLkV1jpW(Fy<n
+
+diff --git a/src/main/resources/data/surveyors_toolbox/recipe/architects_blueprint.json b/src/main/resources/data/surveyors_toolbox/recipe/architects_blueprint.json
+deleted file mode 100644
+index 24698f4..0000000
+--- a/src/main/resources/data/surveyors_toolbox/recipe/architects_blueprint.json
++++ /dev/null
+@@ -1,16 +0,0 @@
+-{
+-  "type": "minecraft:crafting_shapeless",
+-  "category": "misc",
+-  "ingredients": [
+-    {
+-      "item": "minecraft:paper"
+-    },
+-    {
+-      "item": "minecraft:blue_dye"
+-    }
+-  ],
+-  "result": {
+-    "id": "surveyors_toolbox:architects_blueprint",
+-    "count": 1
+-  }
+-}
+\ No newline at end of file
+diff --git a/src/main/resources/data/surveyors_toolbox/recipe/architects_goggles.json b/src/main/resources/data/surveyors_toolbox/recipe/architects_goggles.json
+deleted file mode 100644
+index e0ff118..0000000
+--- a/src/main/resources/data/surveyors_toolbox/recipe/architects_goggles.json
++++ /dev/null
+@@ -1,20 +0,0 @@
+-{
+-  "type": "minecraft:crafting_shaped",
+-  "category": "equipment",
+-  "pattern": [
+-    "G G",
+-    "P P"
+-  ],
+-  "key": {
+-    "G": {
+-      "item": "minecraft:gold_ingot"
+-    },
+-    "P": {
+-      "item": "minecraft:glass_pane"
+-    }
+-  },
+-  "result": {
+-    "id": "surveyors_toolbox:architects_goggles",
+-    "count": 1
+-  }
+-}
+\ No newline at end of file

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "surveyors_toolbox:item/blue_chalk"
+  }
+}

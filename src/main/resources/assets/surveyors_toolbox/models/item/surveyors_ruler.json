@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "surveyors_toolbox:item/surveyors_ruler_v1"
+  }
+}

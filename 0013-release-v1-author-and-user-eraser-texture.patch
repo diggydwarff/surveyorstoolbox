@@ -1,0 +1,59 @@
+diff --git a/gradle.properties b/gradle.properties
+index bb0af2d..22dbe46 100644
+--- a/gradle.properties
++++ b/gradle.properties
+@@ -10,7 +10,7 @@ loader_version_range=[1,)
+ mod_id=surveyors_toolbox
+ mod_name=Surveyor's Toolbox
+ mod_license=MIT
+-mod_version=0.1.0-alpha.3
++mod_version=1.0.0
+ mod_group_id=com.surveyorstoolbox
+-mod_authors=Griffin
+-mod_description=A lightweight building and surveying toolkit for measuring distance, area, volume, slope, boundaries, and interiors.
++mod_authors=diggydwarff
++mod_description=Practical surveying tools for measuring distance, area, volume, slopes, boundaries, and interiors, with persistent colored chalk guides for planning builds.
+diff --git a/src/main/resources/META-INF/neoforge.mods.toml b/src/main/resources/META-INF/neoforge.mods.toml
+index b5967c0..a22929e 100644
+--- a/src/main/resources/META-INF/neoforge.mods.toml
++++ b/src/main/resources/META-INF/neoforge.mods.toml
+@@ -7,6 +7,7 @@ modId="${mod_id}"
+ version="${mod_version}"
+ displayName="${mod_name}"
+ authors="${mod_authors}"
++credits="Built for builders, planners, and large-scale Minecraft projects."
+ description='''${mod_description}'''
+ 
+ [[dependencies.${mod_id}]]
+diff --git a/src/main/resources/assets/surveyors_toolbox/models/item/architects_eraser.json b/src/main/resources/assets/surveyors_toolbox/models/item/architects_eraser.json
+index 04f892a..6897bfc 100644
+--- a/src/main/resources/assets/surveyors_toolbox/models/item/architects_eraser.json
++++ b/src/main/resources/assets/surveyors_toolbox/models/item/architects_eraser.json
+@@ -1,6 +1,6 @@
+ {
+   "parent": "minecraft:item/generated",
+   "textures": {
+-    "layer0": "minecraft:item/brush"
++    "layer0": "surveyors_toolbox:item/architects_eraser"
+   }
+ }
+\ No newline at end of file
+diff --git a/src/main/resources/assets/surveyors_toolbox/textures/item/architects_eraser.png b/src/main/resources/assets/surveyors_toolbox/textures/item/architects_eraser.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..4b7defcff0ac26a3b13fac3d33a8cbe6e871a7b0
+GIT binary patch
+literal 494
+zcmV<K0TKR*P)<h;3K|Lk000e1NJLTq000mG000mO1^@s6AM^iV0005CNkl<Zc$}4!
+zziU%b7>1v7?j;dL($qweItU#Ubh3h=|9}BIh!mrvQMa@XMF?(Mn~JzJIu!+{4sBf|
+zIJk+R6l-fiXs4nkxnL51R4azs^ExPnOH8?b<KaB-_r33T4n(Z+n|YOrLyCGo3>SwK
+z)G7*sN}GU<A|N)v8o)3<cIE%3xK|w1YGYoN$~y%?RYC1T$cottE}Yt?YY(1Lt-WXO
+zzFs8w@oNvrA>h%&+np^8pNwhX*da!8C+O+fkK`~$Z1)0;0ZE7sZmwqHdVQl$Zf#O-
+zC96VzT;J-mT3VRaYJFa%VqT@<VCO8XwHnUE<W{m;80pj8^`k2E$F=tHmF|w^LttA5
+z2BU-NG}egBk*}OTei&h})?@0$BBSM>A*L;Z-qbFP5xcv(DbFRCo_&iomdWRD+F$@b
+zq-KnE#C(!F6I7cGJkR6SlXY6HMeaOp{c~fRht^shNTo<8l6?ODh4l@`a=n41Emv(W
+zUA(Ldxg0YyQ#6~Ocv*hTQUq|bu_S!o=WO;I$?h(e8_me@AKUzW6cT4n58#}O3<LNR
+k_a_X-NOG8He=AhK0fLvxESsVONdN!<07*qoM6N<$f_u&3_y7O^
+
+literal 0
+HcmV?d00001
+

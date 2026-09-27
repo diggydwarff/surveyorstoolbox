@@ -1,0 +1,36 @@
+diff --git a/gradle.properties b/gradle.properties
+index 40067ff..22dbe46 100644
+--- a/gradle.properties
++++ b/gradle.properties
+@@ -10,7 +10,7 @@ loader_version_range=[1,)
+ mod_id=surveyors_toolbox
+ mod_name=Surveyor's Toolbox
+ mod_license=MIT
+-mod_version=0.1.0-alpha.3
++mod_version=1.0.0
+ mod_group_id=com.surveyorstoolbox
+ mod_authors=diggydwarff
+ mod_description=Practical surveying tools for measuring distance, area, volume, slopes, boundaries, and interiors, with persistent colored chalk guides for planning builds.
+diff --git a/src/main/resources/assets/surveyors_toolbox/textures/item/architects_eraser.png b/src/main/resources/assets/surveyors_toolbox/textures/item/architects_eraser.png
+index d314a8869ffaa3e020febec0ed1e15bb96ea359a..4b7defcff0ac26a3b13fac3d33a8cbe6e871a7b0 100644
+GIT binary patch
+delta 469
+zcmV;`0V@8c0`3ElBYy$4Nkl<Zc$}4!ziU%b7>1v7?j;dL($qweItU#Ubh3h=|9}BI
+zh!mrvQMa@XMF?(Mn~JzJIu!+{4sBf|IJk+R6l-fiXs4nkxnL51R4azs^ExPnOH8?b
+z<KaB-_r33T4n(Z+n|YOrLyCGo3>SwK)G7*sN}GU<A|N)v8h^krK6d5*rnpxe)M{g1
+zmC8E>K~+KRL&%ER3ND=5rfUzLQLVja@4j9n`0;BG$RXg-!`q!L44;f?;MgHXawq8N
+z*^lHfMr`*2i~&iA4sNby;(C3fPi}2eZY8Tie_Y?{vszl1)@prTrD9&C;$Y`2thE}>
+z#N<}8S{Uim+<*0>D)h&-_VJbOj^#sOTLuQBgXuKZh|H0%oIidTVX)R?>ct|X<)0y@
+zErZ_FE{qYoySgdQC77Oli#3+X=Wp6z06(N=jCRC)k~<Srn+-hA<JOaPTCGLyJZ=4R
+zW1EN8S{+EGNGFnf{{Dsa4aai5fut>0Z7yBBtP8muGfp#8G@GAzS$@n?1aPylBz)iJ
+zZ1x<<?k<)a&B*W{+x&eL5@${i;GByL1Nam7Ck)0&a+qj;D^$M$f|trHo1z0r00000
+LNkvXXu0mjf>ha)`
+
+delta 268
+zcmaFIyo_mray`RaPZ!6KiaE&%5=94MqJRJY^3wa?e4E<G_BUtU-}C?9|Fgf}|Cf}I
+zkcjBGx+f>?e|@U5KN}FVUDdv3Br$V_0T>7^-f5%$)}EP}`EcW3cS)flEy*4qABi)*
+zrX80~C#+lhcRx`2|4rxH{}2B-@yVyf#M&at_{Hliqxv;bTjw<b!NVt4S8JF(=3y?*
+zefyu2?Gg|7H~G{AAb2syh<o+qja;*`v;V*6FiD80{v+4CjYZ%2*`-*Ezuga6XPh-S
+zE7i4V$CspCAP?+c$s!MQ2XoBk<kLZW7WSG7bYAUAVmMP4WWvwKz_4tOug<DXRx=oY
+Oz|+-_)n%PiLK6Vc=zDko
+
