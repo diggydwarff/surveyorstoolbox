@@ -1,6 +1,7 @@
 package com.surveyorstoolbox.chalk;
 
 import com.surveyorstoolbox.measurement.MeasurementSnapshot;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.DyeColor;
 
@@ -15,8 +16,8 @@ public record ChalkMark(
 ) {
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
-        tag.putUUID("Id", id);
-        tag.putUUID("Owner", owner);
+        tag.store("Id", UUIDUtil.CODEC, id);
+        tag.store("Owner", UUIDUtil.CODEC, owner);
         tag.putString("OwnerName", ownerName);
         tag.putInt("Color", color.getId());
         tag.put("Measurement", measurement.toTag());
@@ -24,11 +25,11 @@ public record ChalkMark(
     }
 
     public static ChalkMark fromTag(CompoundTag tag) {
-        UUID id = tag.hasUUID("Id") ? tag.getUUID("Id") : UUID.randomUUID();
-        UUID owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : new UUID(0L, 0L);
-        String ownerName = tag.getString("OwnerName");
-        DyeColor color = DyeColor.byId(tag.getInt("Color"));
-        MeasurementSnapshot measurement = MeasurementSnapshot.fromTag(tag.getCompound("Measurement"));
+        UUID id = tag.read("Id", UUIDUtil.CODEC).orElseGet(UUID::randomUUID);
+        UUID owner = tag.read("Owner", UUIDUtil.CODEC).orElse(new UUID(0L, 0L));
+        String ownerName = tag.getStringOr("OwnerName", "");
+        DyeColor color = DyeColor.byId(tag.getIntOr("Color", DyeColor.WHITE.getId()));
+        MeasurementSnapshot measurement = MeasurementSnapshot.fromTag(tag.getCompoundOrEmpty("Measurement"));
         return new ChalkMark(id, owner, ownerName, color, measurement);
     }
 }

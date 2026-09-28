@@ -1,8 +1,8 @@
 plugins {
     id 'java-library'
-    id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.147'
+    id 'net.neoforged.moddev' version '2.0.143'
+    id 'idea'
 }
 
 version = mod_version
@@ -12,16 +12,42 @@ base {
     archivesName = mod_id
 }
 
+// Minecraft 1.21.8 uses Java 21.
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 neoForge {
-    version = neo_version
+    version = project.neo_version
+
+    parchment {
+        minecraftVersion = project.parchment_minecraft_version
+        mappingsVersion = project.parchment_mappings_version
+    }
 
     runs {
-        client { client() }
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
         server {
             server()
             programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        data {
+            clientData()
+            programArguments.addAll(
+                    '--mod', project.mod_id,
+                    '--all',
+                    '--output', file('src/generated/resources/').absolutePath,
+                    '--existing', file('src/main/resources/').absolutePath
+            )
+        }
+
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
         }
     }
 
@@ -32,31 +58,47 @@ neoForge {
     }
 }
 
-repositories {
-    mavenCentral()
+sourceSets.main.resources {
+    srcDir('src/generated/resources')
+}
+
+var replaceProperties = [
+        minecraft_version      : minecraft_version,
+        minecraft_version_range: minecraft_version_range,
+        neo_version            : neo_version,
+        neo_version_range      : neo_version_range,
+        loader_version_range   : loader_version_range,
+        mod_id                 : mod_id,
+        mod_name               : mod_name,
+        mod_license            : mod_license,
+        mod_version            : mod_version,
+        mod_authors            : mod_authors,
+        mod_description        : mod_description
+]
+
+processResources {
+    inputs.properties replaceProperties
+
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand replaceProperties
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-processResources {
-    var replaceProperties = [
-            minecraft_version: minecraft_version,
-            minecraft_version_range: minecraft_version_range,
-            neo_version: neo_version,
-            neo_version_range: neo_version_range,
-            loader_version_range: loader_version_range,
-            mod_id: mod_id,
-            mod_name: mod_name,
-            mod_license: mod_license,
-            mod_version: mod_version,
-            mod_authors: mod_authors,
-            mod_description: mod_description
-    ]
-    inputs.properties replaceProperties
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from components.java
+        }
+    }
+}
 
-    filesMatching(['META-INF/neoforge.mods.toml']) {
-        expand replaceProperties
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
     }
 }

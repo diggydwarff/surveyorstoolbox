@@ -1,16 +1,14 @@
 package com.surveyorstoolbox.client;
 
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.surveyorstoolbox.SurveyorsToolbox;
 import com.surveyorstoolbox.measurement.MeasurementMode;
 import com.surveyorstoolbox.measurement.SurveyManager;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
@@ -52,24 +50,9 @@ public final class SurveyRenderer {
      * Faint no-depth-test pass. The normal neon line still depth-tests, while this
      * pass keeps buried/occluded portions readable through terrain.
      */
-    private static final RenderType XRAY_LINES = RenderType.create(
-            "surveyors_toolbox_xray_lines",
-            DefaultVertexFormat.POSITION_COLOR_NORMAL,
-            VertexFormat.Mode.LINES,
-            256,
-            false,
-            false,
-            RenderType.CompositeState.builder()
-                    .setShaderState(RenderType.RENDERTYPE_LINES_SHADER)
-                    .setLineState(RenderType.DEFAULT_LINE)
-                    .setLayeringState(RenderType.VIEW_OFFSET_Z_LAYERING)
-                    .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
-                    .setDepthTestState(RenderType.NO_DEPTH_TEST)
-                    .setCullState(RenderType.NO_CULL)
-                    .setOutputState(RenderType.ITEM_ENTITY_TARGET)
-                    .setWriteMaskState(RenderType.COLOR_WRITE)
-                    .createCompositeState(false)
-    );
+    // Dedicated no-depth-test translucent pass; this keeps occluded portions
+    // faintly visible through terrain, matching the older mod versions.
+    private static final RenderType XRAY_LINES = SurveyRenderTypes.XRAY_LINES;
 
     private static final double GLOW_OUTER_WIDTH = 7.0D;
     private static final double GLOW_INNER_WIDTH = 3.5D;
@@ -97,8 +80,7 @@ public final class SurveyRenderer {
     private static List<Triangle> cachedPolygonTriangles = List.of();
 
     @SubscribeEvent
-    public static void onRenderLevel(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
+    public static void onRenderLevel(RenderLevelStageEvent.AfterParticles event) {
         if (!SurveyManager.hasRenderableMeasurement()) return;
 
         Minecraft minecraft = Minecraft.getInstance();
@@ -720,7 +702,7 @@ public final class SurveyRenderer {
                                    Vec3 point, NeonColor color) {
         double size = 0.13;
         VertexConsumer fill = buffers.getBuffer(RenderType.debugFilledBox());
-        LevelRenderer.addChainedFilledBoxVertices(
+        ShapeRenderer.addChainedFilledBoxVertices(
                 poseStack, fill,
                 point.x - size, point.y - size, point.z - size,
                 point.x + size, point.y + size, point.z + size,
@@ -728,7 +710,7 @@ public final class SurveyRenderer {
         );
 
         VertexConsumer xray = buffers.getBuffer(XRAY_LINES);
-        LevelRenderer.renderLineBox(
+        ShapeRenderer.renderLineBox(
                 poseStack, xray,
                 point.x - size, point.y - size, point.z - size,
                 point.x + size, point.y + size, point.z + size,
@@ -736,7 +718,7 @@ public final class SurveyRenderer {
         );
 
         VertexConsumer line = buffers.getBuffer(RenderType.lines());
-        LevelRenderer.renderLineBox(
+        ShapeRenderer.renderLineBox(
                 poseStack, line,
                 point.x - size, point.y - size, point.z - size,
                 point.x + size, point.y + size, point.z + size,
@@ -749,7 +731,7 @@ public final class SurveyRenderer {
                                            double maxX, double maxY, double maxZ,
                                            NeonColor color, float alpha) {
         VertexConsumer fill = buffers.getBuffer(RenderType.debugFilledBox());
-        LevelRenderer.addChainedFilledBoxVertices(
+        ShapeRenderer.addChainedFilledBoxVertices(
                 poseStack, fill,
                 minX, minY, minZ, maxX, maxY, maxZ,
                 color.r(), color.g(), color.b(), alpha

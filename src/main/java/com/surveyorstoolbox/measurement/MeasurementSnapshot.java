@@ -96,12 +96,12 @@ public record MeasurementSnapshot(
     public static MeasurementSnapshot fromTag(CompoundTag tag) {
         MeasurementMode mode;
         try {
-            mode = MeasurementMode.valueOf(tag.getString("Mode"));
+            mode = MeasurementMode.valueOf(tag.getStringOr("Mode", MeasurementMode.DISTANCE.name()));
         } catch (IllegalArgumentException ignored) {
             mode = MeasurementMode.DISTANCE;
         }
 
-        long[] packedPoints = tag.getLongArray("Points");
+        long[] packedPoints = tag.getLongArray("Points").orElseGet(() -> new long[0]);
         if (packedPoints.length > MAX_POINTS) {
             packedPoints = Arrays.copyOf(packedPoints, MAX_POINTS);
         }
@@ -110,7 +110,7 @@ public record MeasurementSnapshot(
             points.add(BlockPos.of(packed));
         }
 
-        long[] packedWalk = tag.getLongArray("Walk");
+        long[] packedWalk = tag.getLongArray("Walk").orElseGet(() -> new long[0]);
         int walkCount = Math.min(packedWalk.length / 3, MAX_WALK_SAMPLES);
         List<Vec3> walk = new ArrayList<>(walkCount);
         for (int i = 0; i < walkCount; i++) {
@@ -122,14 +122,14 @@ public record MeasurementSnapshot(
             ));
         }
 
-        long[] packedInterior = tag.getLongArray("Interior");
+        long[] packedInterior = tag.getLongArray("Interior").orElseGet(() -> new long[0]);
         int interiorCount = Math.min(packedInterior.length, MAX_INTERIOR_CELLS);
         Set<BlockPos> interior = new HashSet<>(interiorCount);
         for (int i = 0; i < interiorCount; i++) {
             interior.add(BlockPos.of(packedInterior[i]));
         }
 
-        return new MeasurementSnapshot(mode, points, walk, interior, tag.getString("Label"));
+        return new MeasurementSnapshot(mode, points, walk, interior, tag.getStringOr("Label", ""));
     }
 
     public Vec3 anchor() {

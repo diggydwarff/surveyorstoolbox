@@ -1,14 +1,14 @@
 package com.surveyorstoolbox.chalk;
 
+import com.mojang.serialization.Codec;
 import com.surveyorstoolbox.measurement.MeasurementSnapshot;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
@@ -19,22 +19,32 @@ import java.util.UUID;
 public final class ChalkSavedData extends SavedData {
     private static final String DATA_NAME = "surveyors_toolbox_chalk";
     private static final int MAX_MARKS_PER_DIMENSION = 4096;
+    private static final Codec<ChalkSavedData> CODEC = CompoundTag.CODEC.xmap(
+            ChalkSavedData::load,
+            ChalkSavedData::save
+    );
+    private static final SavedDataType<ChalkSavedData> TYPE = new SavedDataType<>(
+            DATA_NAME,
+            ChalkSavedData::new,
+            CODEC,
+            null
+    );
 
     private final List<ChalkMark> marks = new ArrayList<>();
 
     public static ChalkSavedData get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(ChalkSavedData::new, ChalkSavedData::load),
-                DATA_NAME
-        );
+        return level.getDataStorage().computeIfAbsent(TYPE);
     }
 
-    public static ChalkSavedData load(CompoundTag tag, HolderLookup.Provider registries) {
+    private static ChalkSavedData load(CompoundTag tag) {
         ChalkSavedData data = new ChalkSavedData();
-        ListTag list = tag.getList("Marks", Tag.TAG_COMPOUND);
+        ListTag list = tag.getListOrEmpty("Marks");
 
         for (int i = 0; i < list.size() && data.marks.size() < MAX_MARKS_PER_DIMENSION; i++) {
-            ChalkMark mark = ChalkMark.fromTag(list.getCompound(i));
+            CompoundTag markTag = list.getCompound(i).orElse(null);
+            if (markTag == null) continue;
+
+            ChalkMark mark = ChalkMark.fromTag(markTag);
             if (mark.measurement().isValidForPersistence()) {
                 data.marks.add(mark);
             }
@@ -42,8 +52,8 @@ public final class ChalkSavedData extends SavedData {
         return data;
     }
 
-    @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    private CompoundTag save() {
+        CompoundTag tag = new CompoundTag();
         ListTag list = new ListTag();
         for (ChalkMark mark : marks) {
             list.add(mark.toTag());

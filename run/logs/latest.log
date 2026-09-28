@@ -1,96 +1,162 @@
-[26Sep2026 20:23:29.193] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientdev, --version, 21.1.251, --assetIndex, 17, --assetsDir, C:\\Users\\griff\\.gradle\\caches\\neoformruntime\\assets, --gameDir, ., --fml.fmlVersion, 4.0.44, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.251, --fml.neoFormVersion, 20240808.144430]
-[26Sep2026 20:23:29.198] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation Java HotSpot(TM) 64-Bit Server VM 21.0.10+8-LTS-217
-[26Sep2026 20:23:29.201] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.10 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
-[26Sep2026 20:23:29.320] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
-[26Sep2026 20:23:29.445] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
-[26Sep2026 20:23:29.673] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
-[26Sep2026 20:23:29.807] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/C:/Users/griff/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%23138!/ Service=ModLauncher Env=CLIENT
-[26Sep2026 20:23:30.084] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: NVIDIA GeForce RTX 4070/PCIe/SSE2 GL version 4.6.0 NVIDIA 616.56, NVIDIA Corporation
-[26Sep2026 20:23:30.354] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
-[26Sep2026 20:23:30.357] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/]: 
+[28Sep2026 14:37:41.851] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, neoforgeclientdev, --version, 21.8.54, --assetIndex, 26, --assetsDir, C:\\Users\\griff\\.gradle\\caches\\neoformruntime\\assets, --fml.fmlVersion, 9.0.18, --fml.mcVersion, 1.21.8, --fml.neoForgeVersion, 21.8.54, --fml.neoFormVersion, 20250717.133445]
+[28Sep2026 14:37:41.854] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation Java HotSpot(TM) 64-Bit Server VM 21.0.10+8-LTS-217
+[28Sep2026 14:37:41.855] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 9.0 starting: java version 21.0.10 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[28Sep2026 14:37:41.926] [main/WARN] [net.neoforged.fml.loading.FMLConfig/CORE]: Configuration file E:\Repositories\SurveyorsToolbox\run\config\fml.toml is not correct. Correcting
+[28Sep2026 14:37:41.961] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[28Sep2026 14:37:42.481] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/C:/Users/griff/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%23157!/ Service=ModLauncher Env=CLIENT
+[28Sep2026 14:37:42.492] [main/WARN] [net.neoforged.fml.loading.FMLConfig/CORE]: Configuration file E:\Repositories\SurveyorsToolbox\run\config\fml.toml is not correct. Correcting
+[28Sep2026 14:37:42.718] [fml-loadingscreen/INFO] [net.neoforged.fml.earlydisplay.render.LoadingScreenRenderer/]: GL info: NVIDIA GeForce RTX 4070/PCIe/SSE2 GL version 3.2.0 NVIDIA 616.56, NVIDIA Corporation
+[28Sep2026 14:37:42.899] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[28Sep2026 14:37:42.901] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/]: 
      Mod List:
 		Name Version (Mod Id)
 
-		Minecraft 1.21.1 (minecraft)
-		NeoForge 21.1.251 (neoforge)
+		Minecraft 1.21.8 (minecraft)
+		NeoForge 21.8.54 (neoforge)
 		Surveyor's Toolbox 1.0.0 (surveyors_toolbox)
-[26Sep2026 20:23:31.475] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientdev' with arguments [--version, 21.1.251, --gameDir, ., --assetsDir, C:\Users\griff\.gradle\caches\neoformruntime\assets, --assetIndex, 17]
-[26Sep2026 20:23:33.635] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 229 Datafixer optimizations took 461 milliseconds
-[26Sep2026 20:23:33.976] [pool-7-thread-1/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.3).
-[26Sep2026 20:23:39.820] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
-[26Sep2026 20:23:39.821] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
-[26Sep2026 20:23:39.825] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
-[26Sep2026 20:23:39.827] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
-[26Sep2026 20:23:39.828] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
-[26Sep2026 20:23:39.976] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/E:/Repositories/SurveyorsToolbox/build/moddev/artifacts/neoforge-21.1.251.jar%23189!/assets/.mcassetsroot' uses unexpected schema
-[26Sep2026 20:23:39.977] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/E:/Repositories/SurveyorsToolbox/build/moddev/artifacts/neoforge-21.1.251.jar%23189!/data/.mcassetsroot' uses unexpected schema
-[26Sep2026 20:23:40.017] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
-[26Sep2026 20:23:40.030] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev
-[26Sep2026 20:23:40.149] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Backend library: LWJGL version 3.3.3+5
-[26Sep2026 20:23:40.583] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.251, for MC 1.21.1
-[26Sep2026 20:23:41.567] [Render thread/INFO] [net.neoforged.neoforge.gametest.GameTestHooks/]: Enabled Gametest Namespaces: []
-[26Sep2026 20:23:41.735] [Render thread/INFO] [net.minecraft.server.packs.resources.ReloadableResourceManager/]: Reloading ResourceManager: vanilla, mod_resources, mod/surveyors_toolbox, mod/neoforge
-[26Sep2026 20:23:41.867] [Worker-Main-13/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_jp_patch-15.1.05.hex, loading
-[26Sep2026 20:23:41.867] [Worker-Main-10/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_all_no_pua-15.1.05.hex, loading
-[26Sep2026 20:23:44.100] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:item.goat_horn.play
-[26Sep2026 20:23:44.101] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
-[26Sep2026 20:23:44.151] [Render thread/INFO] [com.mojang.blaze3d.audio.Library/]: OpenAL initialized on device OpenAL Soft on Odyssey Ark (NVIDIA High Definition Audio)
-[26Sep2026 20:23:44.153] [Render thread/INFO] [net.minecraft.client.sounds.SoundEngine/SOUNDS]: Sound engine started
-[26Sep2026 20:23:44.296] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
-[26Sep2026 20:23:44.306] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
-[26Sep2026 20:23:44.306] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
-[26Sep2026 20:23:44.308] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
-[26Sep2026 20:23:44.309] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
-[26Sep2026 20:23:44.313] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
-[26Sep2026 20:23:44.314] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
-[26Sep2026 20:23:44.314] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
-[26Sep2026 20:23:44.314] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
-[26Sep2026 20:23:44.522] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
-[26Sep2026 20:23:44.523] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
-[26Sep2026 20:23:44.525] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
-[26Sep2026 20:23:44.525] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
-[26Sep2026 20:23:44.525] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
-[26Sep2026 20:23:44.550] [Render thread/WARN] [net.minecraft.client.renderer.ShaderInstance/]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
-[26Sep2026 20:23:44.619] [Render thread/INFO] [net.neoforged.neoforge.client.entity.animation.json.AnimationLoader/]: Loaded 0 entity animations
-[26Sep2026 20:24:11.153] [Render thread/WARN] [net.neoforged.neoforge.common.CommonHooks/WP]: The following mods have version differences that were not resolved:
-surveyors_toolbox (version 0.1.0-alpha.3 -> 1.0.0)
-Things may not work well.
-[26Sep2026 20:24:11.997] [Render thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1308 recipes
-[26Sep2026 20:24:12.144] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1399 advancements
-[26Sep2026 20:24:12.619] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Starting integrated minecraft server version 1.21.1
-[26Sep2026 20:24:12.619] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
-[26Sep2026 20:24:13.394] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
-[26Sep2026 20:24:13.690] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
-[26Sep2026 20:24:13.841] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 441 ms
-[26Sep2026 20:24:13.843] [Server thread/INFO] [net.neoforged.neoforge.server.permission.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
-[26Sep2026 20:24:13.934] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing view distance to 12, from 10
-[26Sep2026 20:24:13.936] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing simulation distance to 12, from 0
-[26Sep2026 20:24:14.607] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[local:E:781ff88e] logged in with entity id 65 at (-5.329305226691, 103.0, 18.977454746919285)
-[26Sep2026 20:24:14.679] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
-[26Sep2026 20:24:14.831] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 2 advancements
-[26Sep2026 20:24:51.401] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Saved screenshot as 2026-09-26_20.24.51.png
-[26Sep2026 20:24:55.517] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Saved screenshot as 2026-09-26_20.24.55.png
-[26Sep2026 20:25:10.363] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Saved screenshot as 2026-09-26_20.25.10.png
-[26Sep2026 20:25:18.759] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Saved screenshot as 2026-09-26_20.25.18.png
-[26Sep2026 20:25:39.733] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Saved screenshot as 2026-09-26_20.25.39.png
-[26Sep2026 20:26:11.846] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Saved screenshot as 2026-09-26_20.26.11.png
-[26Sep2026 20:26:18.587] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Saved screenshot as 2026-09-26_20.26.18.png
-[26Sep2026 20:26:35.247] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Saved screenshot as 2026-09-26_20.26.34.png
-[26Sep2026 20:29:12.897] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Saving and pausing game...
-[26Sep2026 20:29:12.966] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
-[26Sep2026 20:29:13.010] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
-[26Sep2026 20:29:13.010] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
-[26Sep2026 20:29:14.148] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Stopping!
-[26Sep2026 20:29:14.205] [Server thread/INFO] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev lost connection: Disconnected
-[26Sep2026 20:29:14.206] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev left the game
-[26Sep2026 20:29:14.930] [Server thread/INFO] [net.minecraft.server.network.ServerCommonPacketListenerImpl/]: Stopping singleplayer server as player logged out
-[26Sep2026 20:29:14.964] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping server
-[26Sep2026 20:29:14.965] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
-[26Sep2026 20:29:14.965] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving worlds
-[26Sep2026 20:29:15.129] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
-[26Sep2026 20:29:16.261] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
-[26Sep2026 20:29:16.438] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
-[26Sep2026 20:29:16.689] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (New World): All chunks are saved
-[26Sep2026 20:29:16.691] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
-[26Sep2026 20:29:16.691] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
-[26Sep2026 20:29:16.691] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved
+[28Sep2026 14:37:43.907] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'neoforgeclientdev' with arguments [--version, 21.8.54, --assetsDir, C:\Users\griff\.gradle\caches\neoformruntime\assets, --assetIndex, 26]
+[28Sep2026 14:37:45.713] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 272 Datafixer optimizations took 530 milliseconds
+[28Sep2026 14:37:45.892] [pool-6-thread-1/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.3).
+[28Sep2026 14:37:51.173] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[28Sep2026 14:37:51.174] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[28Sep2026 14:37:51.177] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[28Sep2026 14:37:51.178] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[28Sep2026 14:37:51.179] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[28Sep2026 14:37:51.180] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [waypoint, modify, waypoint, color, reset] and [waypoint, modify, waypoint, color, color] with inputs: [reset]
+[28Sep2026 14:37:51.248] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.8.54, for MC 1.21.8
+[28Sep2026 14:37:51.695] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/E:/Repositories/SurveyorsToolbox/build/moddev/artifacts/neoforge-21.8.54.jar%23212!/assets/.mcassetsroot' uses unexpected schema
+[28Sep2026 14:37:51.696] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/E:/Repositories/SurveyorsToolbox/build/moddev/artifacts/neoforge-21.8.54.jar%23212!/data/.mcassetsroot' uses unexpected schema
+[28Sep2026 14:37:51.724] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[28Sep2026 14:37:51.733] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev
+[28Sep2026 14:37:51.834] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Backend library: LWJGL version 3.3.3+5
+[28Sep2026 14:37:51.980] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Using optional rendering extensions: GL_ARB_buffer_storage, GL_KHR_debug, GL_ARB_vertex_attrib_binding, GL_ARB_direct_state_access
+[28Sep2026 14:37:52.618] [Render thread/INFO] [net.minecraft.server.packs.resources.ReloadableResourceManager/]: Reloading ResourceManager: vanilla, mod_resources, mod/surveyors_toolbox, mod/neoforge
+[28Sep2026 14:37:52.730] [resourceLoad/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_all_no_pua-16.0.03.hex, loading
+[28Sep2026 14:37:52.741] [resourceLoad/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_pua-16.0.03.hex, loading
+[28Sep2026 14:37:52.881] [resourceLoad/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_jp_patch-16.0.03.hex, loading
+[28Sep2026 14:37:54.241] [Render thread/INFO] [com.mojang.blaze3d.audio.Library/]: OpenAL initialized on device OpenAL Soft on Odyssey Ark (NVIDIA High Definition Audio)
+[28Sep2026 14:37:54.242] [Render thread/INFO] [net.minecraft.client.sounds.SoundEngine/SOUNDS]: Sound engine started
+[28Sep2026 14:37:54.331] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
+[28Sep2026 14:37:54.340] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[28Sep2026 14:37:54.341] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[28Sep2026 14:37:54.342] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[28Sep2026 14:37:54.342] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 2048x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[28Sep2026 14:37:54.344] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[28Sep2026 14:37:54.348] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[28Sep2026 14:37:54.348] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[28Sep2026 14:37:54.349] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[28Sep2026 14:37:54.350] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[28Sep2026 14:37:54.353] [Render thread/INFO] [net.neoforged.neoforge.client.entity.animation.json.AnimationLoader/]: Loaded 0 entity animations
+[28Sep2026 14:37:54.516] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
+[28Sep2026 14:37:54.517] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[28Sep2026 14:37:54.517] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
+[28Sep2026 14:38:05.718] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:architects_eraser' from 'surveyors_toolbox:recipe/architects_eraser.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.726] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:black_chalk' from 'surveyors_toolbox:recipe/black_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.728] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:blue_chalk' from 'surveyors_toolbox:recipe/blue_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.733] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:brown_chalk' from 'surveyors_toolbox:recipe/brown_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.748] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:cyan_chalk' from 'surveyors_toolbox:recipe/cyan_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.767] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:gray_chalk' from 'surveyors_toolbox:recipe/gray_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.769] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:green_chalk' from 'surveyors_toolbox:recipe/green_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.775] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:light_blue_chalk' from 'surveyors_toolbox:recipe/light_blue_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.778] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:light_gray_chalk' from 'surveyors_toolbox:recipe/light_gray_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.780] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:lime_chalk' from 'surveyors_toolbox:recipe/lime_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.782] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:magenta_chalk' from 'surveyors_toolbox:recipe/magenta_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.789] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:orange_chalk' from 'surveyors_toolbox:recipe/orange_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.793] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:pink_chalk' from 'surveyors_toolbox:recipe/pink_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.799] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:purple_chalk' from 'surveyors_toolbox:recipe/purple_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.803] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:red_chalk' from 'surveyors_toolbox:recipe/red_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.813] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:surveyors_ruler' from 'surveyors_toolbox:recipe/surveyors_ruler.json': DataResult.Error['Map entry 'I' : Failed to parse either. First: Input does not contain a key [type]: MapLike[{"item":"minecraft:iron_ingot"}]; Second: Failed to parse either. First: Not a string: {"item":"minecraft:iron_ingot"}; Second: Failed to parse either. First: Not a json array: {"item":"minecraft:iron_ingot"}; Second: Not a string: {"item":"minecraft:iron_ingot"}; Input does not contain a key [neoforge:ingredient_type]: MapLike[{"item":"minecraft:iron_ingot"}]']
+[28Sep2026 14:38:05.825] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:white_chalk' from 'surveyors_toolbox:recipe/white_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:05.827] [Worker-Main-22/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:yellow_chalk' from 'surveyors_toolbox:recipe/yellow_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:38:06.009] [Render thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1407 recipes
+[28Sep2026 14:38:06.024] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1520 advancements
+[28Sep2026 14:38:06.027] [Render thread/INFO] [net.neoforged.neoforge.common.crafting.RecipePriorityManager/]: Loaded 0 recipe priority overrides
+[28Sep2026 14:38:06.263] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Starting integrated minecraft server version 1.21.8
+[28Sep2026 14:38:06.263] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
+[28Sep2026 14:38:06.596] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
+[28Sep2026 14:38:07.277] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[28Sep2026 14:38:07.277] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[28Sep2026 14:38:07.528] [Server thread/INFO] [net.neoforged.neoforge.server.permission.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[28Sep2026 14:38:07.541] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 944 ms
+[28Sep2026 14:38:07.613] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing view distance to 12, from 10
+[28Sep2026 14:38:07.614] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing simulation distance to 12, from 0
+[28Sep2026 14:38:08.513] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[local:E:ec3e3120] logged in with entity id 124 at (-385.3776968843411, 63.0, -492.8890703201782)
+[28Sep2026 14:38:08.560] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
+[28Sep2026 14:38:08.787] [Render thread/INFO] [net.minecraft.client.renderer.DynamicUniformStorage/]: Resizing Dynamic Transforms UBO, capacity limit of 2 reached during a single frame. New capacity will be 4.
+[28Sep2026 14:38:08.832] [Render thread/INFO] [net.minecraft.client.renderer.DynamicUniformStorage/]: Resizing Dynamic Transforms UBO, capacity limit of 4 reached during a single frame. New capacity will be 8.
+[28Sep2026 14:38:08.835] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 2 advancements
+[28Sep2026 14:38:08.969] [Render thread/INFO] [net.minecraft.client.renderer.DynamicUniformStorage/]: Resizing Dynamic Transforms UBO, capacity limit of 8 reached during a single frame. New capacity will be 16.
+[28Sep2026 14:38:09.078] [Render thread/INFO] [net.minecraft.client.renderer.DynamicUniformStorage/]: Resizing Dynamic Transforms UBO, capacity limit of 16 reached during a single frame. New capacity will be 32.
+[28Sep2026 14:38:09.139] [Render thread/INFO] [net.minecraft.client.renderer.DynamicUniformStorage/]: Resizing Dynamic Transforms UBO, capacity limit of 32 reached during a single frame. New capacity will be 64.
+[28Sep2026 14:38:09.445] [Render thread/INFO] [net.minecraft.client.renderer.DynamicUniformStorage/]: Resizing Dynamic Transforms UBO, capacity limit of 64 reached during a single frame. New capacity will be 128.
+[28Sep2026 14:38:09.596] [Render thread/INFO] [net.minecraft.client.renderer.DynamicUniformStorage/]: Resizing Dynamic Transforms UBO, capacity limit of 128 reached during a single frame. New capacity will be 256.
+[28Sep2026 14:38:09.841] [Render thread/INFO] [net.minecraft.client.renderer.DynamicUniformStorage/]: Resizing Dynamic Transforms UBO, capacity limit of 256 reached during a single frame. New capacity will be 512.
+[28Sep2026 14:38:10.530] [Render thread/INFO] [net.minecraft.client.renderer.DynamicUniformStorage/]: Resizing Dynamic Transforms UBO, capacity limit of 512 reached during a single frame. New capacity will be 1024.
+[28Sep2026 14:38:12.091] [Render thread/INFO] [net.minecraft.client.renderer.DynamicUniformStorage/]: Resizing Dynamic Transforms UBO, capacity limit of 1024 reached during a single frame. New capacity will be 2048.
+[28Sep2026 14:39:30.032] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Saving and pausing game...
+[28Sep2026 14:39:30.080] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[1.21.8]'/minecraft:overworld
+[28Sep2026 14:39:30.111] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[1.21.8]'/minecraft:the_end
+[28Sep2026 14:39:30.112] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[1.21.8]'/minecraft:the_nether
+[28Sep2026 14:39:31.075] [Server thread/INFO] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev lost connection: Disconnected
+[28Sep2026 14:39:31.076] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev left the game
+[28Sep2026 14:39:31.175] [Server thread/INFO] [net.minecraft.server.network.ServerCommonPacketListenerImpl/]: Stopping singleplayer server as player logged out
+[28Sep2026 14:39:31.186] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping server
+[28Sep2026 14:39:31.187] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
+[28Sep2026 14:39:31.187] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving worlds
+[28Sep2026 14:39:33.329] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[1.21.8]'/minecraft:overworld
+[28Sep2026 14:39:33.934] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[1.21.8]'/minecraft:the_end
+[28Sep2026 14:39:34.099] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[1.21.8]'/minecraft:the_nether
+[28Sep2026 14:39:34.303] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (1_21_8): All chunks are saved
+[28Sep2026 14:39:34.303] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[28Sep2026 14:39:34.304] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[28Sep2026 14:39:34.304] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved
+[28Sep2026 14:39:37.498] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:architects_eraser' from 'surveyors_toolbox:recipe/architects_eraser.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.502] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:black_chalk' from 'surveyors_toolbox:recipe/black_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.505] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:blue_chalk' from 'surveyors_toolbox:recipe/blue_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.509] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:brown_chalk' from 'surveyors_toolbox:recipe/brown_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.520] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:cyan_chalk' from 'surveyors_toolbox:recipe/cyan_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.536] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:gray_chalk' from 'surveyors_toolbox:recipe/gray_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.544] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:green_chalk' from 'surveyors_toolbox:recipe/green_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.551] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:light_blue_chalk' from 'surveyors_toolbox:recipe/light_blue_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.553] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:light_gray_chalk' from 'surveyors_toolbox:recipe/light_gray_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.554] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:lime_chalk' from 'surveyors_toolbox:recipe/lime_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.556] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:magenta_chalk' from 'surveyors_toolbox:recipe/magenta_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.564] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:orange_chalk' from 'surveyors_toolbox:recipe/orange_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.569] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:pink_chalk' from 'surveyors_toolbox:recipe/pink_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.576] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:purple_chalk' from 'surveyors_toolbox:recipe/purple_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.581] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:red_chalk' from 'surveyors_toolbox:recipe/red_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.591] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:surveyors_ruler' from 'surveyors_toolbox:recipe/surveyors_ruler.json': DataResult.Error['Map entry 'I' : Failed to parse either. First: Input does not contain a key [type]: MapLike[{"item":"minecraft:iron_ingot"}]; Second: Failed to parse either. First: Not a string: {"item":"minecraft:iron_ingot"}; Second: Failed to parse either. First: Not a json array: {"item":"minecraft:iron_ingot"}; Second: Not a string: {"item":"minecraft:iron_ingot"}; Input does not contain a key [neoforge:ingredient_type]: MapLike[{"item":"minecraft:iron_ingot"}]']
+[28Sep2026 14:39:37.604] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:white_chalk' from 'surveyors_toolbox:recipe/white_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.606] [Worker-Main-14/ERROR] [net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener/]: Couldn't parse data file 'surveyors_toolbox:yellow_chalk' from 'surveyors_toolbox:recipe/yellow_chalk.json': DataResult.Error['List is too short: 0, expected range [1-9]']
+[28Sep2026 14:39:37.694] [Render thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1407 recipes
+[28Sep2026 14:39:37.702] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1520 advancements
+[28Sep2026 14:39:37.702] [Render thread/INFO] [net.neoforged.neoforge.common.crafting.RecipePriorityManager/]: Loaded 0 recipe priority overrides
+[28Sep2026 14:39:37.814] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Starting integrated minecraft server version 1.21.8
+[28Sep2026 14:39:37.815] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
+[28Sep2026 14:39:37.935] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
+[28Sep2026 14:39:38.320] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[28Sep2026 14:39:38.364] [Server thread/INFO] [net.neoforged.neoforge.server.permission.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[28Sep2026 14:39:38.365] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 410 ms
+[28Sep2026 14:39:38.382] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing view distance to 12, from 10
+[28Sep2026 14:39:38.382] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing simulation distance to 12, from 0
+[28Sep2026 14:39:38.579] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[local:E:7887b6db] logged in with entity id 1137 at (-408.6412229505566, 65.0, -498.7395527965368)
+[28Sep2026 14:39:38.649] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
+[28Sep2026 14:39:38.699] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 2 advancements
+[28Sep2026 14:39:40.217] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Saving and pausing game...
+[28Sep2026 14:39:40.316] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[1.21.8]'/minecraft:overworld
+[28Sep2026 14:39:40.365] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[1.21.8]'/minecraft:the_end
+[28Sep2026 14:39:40.366] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[1.21.8]'/minecraft:the_nether
+[28Sep2026 14:39:41.621] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Stopping!
+[28Sep2026 14:39:41.672] [Server thread/INFO] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev lost connection: Disconnected
+[28Sep2026 14:39:41.673] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev left the game
+[28Sep2026 14:39:41.768] [Server thread/INFO] [net.minecraft.server.network.ServerCommonPacketListenerImpl/]: Stopping singleplayer server as player logged out
+[28Sep2026 14:39:41.776] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping server
+[28Sep2026 14:39:41.777] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
+[28Sep2026 14:39:41.777] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving worlds
+[28Sep2026 14:39:41.826] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[1.21.8]'/minecraft:overworld
+[28Sep2026 14:39:42.494] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[1.21.8]'/minecraft:the_end
+[28Sep2026 14:39:42.637] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[1.21.8]'/minecraft:the_nether
+[28Sep2026 14:39:42.939] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (1_21_8): All chunks are saved
+[28Sep2026 14:39:42.939] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[28Sep2026 14:39:42.939] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[28Sep2026 14:39:42.939] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved

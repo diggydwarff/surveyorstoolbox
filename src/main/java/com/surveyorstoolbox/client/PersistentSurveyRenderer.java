@@ -1,10 +1,8 @@
 package com.surveyorstoolbox.client;
 
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.surveyorstoolbox.SurveyorsToolbox;
 import com.surveyorstoolbox.chalk.ChalkMark;
 import com.surveyorstoolbox.measurement.MeasurementMode;
@@ -32,22 +30,9 @@ public final class PersistentSurveyRenderer {
     private static final ByteBufferBuilder BUFFER = new ByteBufferBuilder(2 * 1024 * 1024);
     private static final MultiBufferSource.BufferSource BUFFERS = MultiBufferSource.immediate(BUFFER);
 
-    private static final RenderType XRAY_LINES = RenderType.create(
-            "surveyors_toolbox_persistent_xray",
-            DefaultVertexFormat.POSITION_COLOR_NORMAL,
-            VertexFormat.Mode.LINES,
-            256,
-            false,
-            false,
-            RenderType.CompositeState.builder()
-                    .setShaderState(RenderType.RENDERTYPE_LINES_SHADER)
-                    .setLineState(RenderType.DEFAULT_LINE)
-                    .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
-                    .setDepthTestState(RenderType.NO_DEPTH_TEST)
-                    .setCullState(RenderType.NO_CULL)
-                    .setWriteMaskState(RenderType.COLOR_WRITE)
-                    .createCompositeState(false)
-    );
+    // Dedicated no-depth-test translucent pass; this keeps occluded portions
+    // faintly visible through terrain, matching the older mod versions.
+    private static final RenderType XRAY_LINES = SurveyRenderTypes.XRAY_LINES;
 
     private static final double CHALK_RENDER_DISTANCE = 96.0D;
     private static final double CHALK_FULL_DISTANCE = 36.0D;
@@ -59,8 +44,7 @@ public final class PersistentSurveyRenderer {
     private static final int CIRCLE_SEGMENTS = 72;
 
     @SubscribeEvent
-    public static void onRenderLevel(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
+    public static void onRenderLevel(RenderLevelStageEvent.AfterParticles event) {
 
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.level == null) return;

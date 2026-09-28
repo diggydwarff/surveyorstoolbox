@@ -68,7 +68,7 @@ public final class SurveyNetworking {
 
         switch (payload.action()) {
             case ServerSurveyActionPayload.REQUEST_SYNC -> {
-                long now = player.serverLevel().getGameTime();
+                long now = player.level().getGameTime();
                 long previous = LAST_SYNC_REQUEST.getOrDefault(player.getUUID(), Long.MIN_VALUE / 2L);
                 if (now - previous < MIN_SYNC_REQUEST_TICKS) return;
 
@@ -90,14 +90,19 @@ public final class SurveyNetworking {
                     return;
                 }
 
-                ChalkSavedData.AddResult result = ChalkSavedData.get(player.serverLevel())
+                ChalkSavedData.AddResult result = ChalkSavedData.get(player.level())
                         .add(player, chalk.color(), snapshot);
 
                 switch (result) {
                     case ADDED -> {
-                        held.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
+                        held.hurtAndBreak(
+                                1,
+                                player.level(),
+                                player,
+                                item -> player.onEquippedItemBroken(item, LivingEntity.getSlotForHand(hand))
+                        );
                         status(player, capitalize(chalk.color().getName()) + " chalk guide saved.", ChatFormatting.GREEN);
-                        syncDimension(player.serverLevel());
+                        syncDimension(player.level());
                     }
                     case DUPLICATE ->
                             status(player, "That measurement is already chalked in this color.", ChatFormatting.GRAY);
@@ -111,17 +116,17 @@ public final class SurveyNetworking {
             case ServerSurveyActionPayload.ERASE_NEAREST -> {
                 if (!(held.getItem() instanceof ArchitectsEraserItem)) return;
 
-                Vec3 target = Vec3Target.from(payload.data().getLong("Target")).vec();
+                Vec3 target = Vec3Target.from(payload.data().getLongOr("Target", BlockPos.ZERO.asLong())).vec();
                 if (player.getEyePosition().distanceTo(target) > MAX_ERASER_TARGET_DISTANCE) {
                     status(player, "That chalk mark is too far away.", ChatFormatting.GRAY);
                     return;
                 }
 
-                var result = ChalkSavedData.get(player.serverLevel()).removeNearest(player, target, 5.5D);
+                var result = ChalkSavedData.get(player.level()).removeNearest(player, target, 5.5D);
                 switch (result) {
                     case REMOVED -> {
                         status(player, "Chalk guide erased.", ChatFormatting.GREEN);
-                        syncDimension(player.serverLevel());
+                        syncDimension(player.level());
                     }
                     case NOT_OWNER ->
                             status(player, "That chalk guide belongs to another player.", ChatFormatting.RED);
@@ -133,9 +138,9 @@ public final class SurveyNetworking {
             case ServerSurveyActionPayload.CLEAR_OWN_CHALK -> {
                 if (!(held.getItem() instanceof ArchitectsEraserItem)) return;
 
-                int removed = ChalkSavedData.get(player.serverLevel()).clearOwned(player.getUUID());
+                int removed = ChalkSavedData.get(player.level()).clearOwned(player.getUUID());
                 status(player, "Cleared " + removed + " of your chalk guides.", ChatFormatting.GRAY);
-                if (removed > 0) syncDimension(player.serverLevel());
+                if (removed > 0) syncDimension(player.level());
             }
 
 
@@ -157,7 +162,7 @@ public final class SurveyNetworking {
     }
 
     private static void sendSync(ServerPlayer player) {
-        List<ChalkMark> marks = ChalkSavedData.get(player.serverLevel())
+        List<ChalkMark> marks = ChalkSavedData.get(player.level())
                 .near(player.position(), SYNC_RADIUS, MAX_SYNC_MARKS);
 
         if (marks.isEmpty()) {

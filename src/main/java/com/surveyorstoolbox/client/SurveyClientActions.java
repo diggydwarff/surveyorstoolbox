@@ -7,7 +7,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 public final class SurveyClientActions {
     public static void commitChalk(Player player, InteractionHand hand) {
@@ -20,17 +20,17 @@ public final class SurveyClientActions {
             status(player, "This measurement is too large to chalk.", ChatFormatting.YELLOW);
             return;
         }
-        PacketDistributor.sendToServer(ServerSurveyActionPayload.commit(hand, snapshot.toTag()));
+        ClientPacketDistributor.sendToServer(ServerSurveyActionPayload.commit(hand, snapshot.toTag()));
     }
 
 
 
     public static void eraseNearest(InteractionHand hand, long clickedPos) {
-        PacketDistributor.sendToServer(ServerSurveyActionPayload.erase(hand, clickedPos));
+        ClientPacketDistributor.sendToServer(ServerSurveyActionPayload.erase(hand, clickedPos));
     }
 
     public static void clearOwnChalk(InteractionHand hand) {
-        PacketDistributor.sendToServer(ServerSurveyActionPayload.clearOwn(hand));
+        ClientPacketDistributor.sendToServer(ServerSurveyActionPayload.clearOwn(hand));
     }
 
     private static void status(Player player, String text, ChatFormatting color) {

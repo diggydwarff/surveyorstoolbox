@@ -1,8 +1,16 @@
-Complete source project.
+NeoForge 1.21.8 source project.
 
-The Gradle wrapper binary JAR is not generated here. Either:
-1. Open with local Gradle 9.2.1, or
-2. Copy gradle-wrapper.jar plus gradlew / gradlew.bat from the official NeoForge 1.21.1 ModDevGradle MDK.
+Requirements:
+- Java 21
+- NeoForge 21.8.54
+- ModDevGradle 2.0.143
+- Gradle 9.2.1
 
-Then run:
-gradle build
+Build:
+  gradlew build
+
+Run client:
+  gradlew runClient
+
+Output jar:
+  build/libs/surveyors_toolbox-1.0.0.jar

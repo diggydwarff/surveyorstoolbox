@@ -10,7 +10,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import org.lwjgl.glfw.GLFW;
 
-@EventBusSubscriber(modid = SurveyorsToolbox.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = SurveyorsToolbox.MOD_ID, value = Dist.CLIENT)
 public final class ClientKeyMappings {
     public static final KeyMapping NEXT_MODE = new KeyMapping(
             "key.surveyors_toolbox.next_mode",
