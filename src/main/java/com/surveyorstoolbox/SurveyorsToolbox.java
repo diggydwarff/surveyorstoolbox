@@ -2,26 +2,17 @@ package com.surveyorstoolbox;
 
 import com.surveyorstoolbox.network.SurveyNetworking;
 import com.surveyorstoolbox.registry.ModItems;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(SurveyorsToolbox.MOD_ID)
 public final class SurveyorsToolbox {
     public static final String MOD_ID = "surveyors_toolbox";
 
-    public SurveyorsToolbox(IEventBus modBus) {
+    public SurveyorsToolbox() {
+        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         ModItems.ITEMS.register(modBus);
-        modBus.addListener(SurveyNetworking::register);
-        modBus.addListener(this::addCreativeTabContents);
-    }
-
-    private void addCreativeTabContents(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
-            event.accept(ModItems.SURVEYORS_RULER.get());
-            event.accept(ModItems.ARCHITECTS_ERASER.get());
-            ModItems.CHALKS.values().forEach(item -> event.accept(item.get()));
-        }
+        SurveyNetworking.register();
     }
 }

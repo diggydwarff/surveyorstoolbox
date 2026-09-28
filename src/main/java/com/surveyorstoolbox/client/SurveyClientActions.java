@@ -3,11 +3,11 @@ package com.surveyorstoolbox.client;
 import com.surveyorstoolbox.measurement.MeasurementSnapshot;
 import com.surveyorstoolbox.measurement.SurveyManager;
 import com.surveyorstoolbox.network.ServerSurveyActionPayload;
+import com.surveyorstoolbox.network.SurveyNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public final class SurveyClientActions {
     public static void commitChalk(Player player, InteractionHand hand) {
@@ -20,17 +20,15 @@ public final class SurveyClientActions {
             status(player, "This measurement is too large to chalk.", ChatFormatting.YELLOW);
             return;
         }
-        PacketDistributor.sendToServer(ServerSurveyActionPayload.commit(hand, snapshot.toTag()));
+        SurveyNetworking.sendToServer(ServerSurveyActionPayload.commit(hand, snapshot.toTag()));
     }
 
-
-
     public static void eraseNearest(InteractionHand hand, long clickedPos) {
-        PacketDistributor.sendToServer(ServerSurveyActionPayload.erase(hand, clickedPos));
+        SurveyNetworking.sendToServer(ServerSurveyActionPayload.erase(hand, clickedPos));
     }
 
     public static void clearOwnChalk(InteractionHand hand) {
-        PacketDistributor.sendToServer(ServerSurveyActionPayload.clearOwn(hand));
+        SurveyNetworking.sendToServer(ServerSurveyActionPayload.clearOwn(hand));
     }
 
     private static void status(Player player, String text, ChatFormatting color) {

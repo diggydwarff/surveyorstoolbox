@@ -1,31 +1,17 @@
 package com.surveyorstoolbox.network;
 
-import com.surveyorstoolbox.SurveyorsToolbox;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
+import net.minecraftforge.network.NetworkEvent;
 
-public record ServerSurveyActionPayload(int action, int hand, CompoundTag data) implements CustomPacketPayload {
+import java.util.function.Supplier;
+
+public record ServerSurveyActionPayload(int action, int hand, CompoundTag data) {
     public static final int REQUEST_SYNC = 0;
     public static final int COMMIT_CHALK = 1;
     public static final int ERASE_NEAREST = 2;
     public static final int CLEAR_OWN_CHALK = 3;
-
-    public static final Type<ServerSurveyActionPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(SurveyorsToolbox.MOD_ID, "survey_action")
-    );
-
-    public static final StreamCodec<RegistryFriendlyByteBuf, ServerSurveyActionPayload> STREAM_CODEC =
-            StreamCodec.composite(
-                    ByteBufCodecs.VAR_INT, ServerSurveyActionPayload::action,
-                    ByteBufCodecs.VAR_INT, ServerSurveyActionPayload::hand,
-                    ByteBufCodecs.COMPOUND_TAG, ServerSurveyActionPayload::data,
-                    ServerSurveyActionPayload::new
-            );
 
     public static ServerSurveyActionPayload requestSync() {
         return new ServerSurveyActionPayload(REQUEST_SYNC, 0, new CompoundTag());
@@ -45,9 +31,20 @@ public record ServerSurveyActionPayload(int action, int hand, CompoundTag data) 
         return new ServerSurveyActionPayload(CLEAR_OWN_CHALK, hand == InteractionHand.MAIN_HAND ? 0 : 1, new CompoundTag());
     }
 
+    public static void encode(ServerSurveyActionPayload message, FriendlyByteBuf buffer) {
+        buffer.writeVarInt(message.action());
+        buffer.writeVarInt(message.hand());
+        buffer.writeNbt(message.data());
+    }
 
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public static ServerSurveyActionPayload decode(FriendlyByteBuf buffer) {
+        int action = buffer.readVarInt();
+        int hand = buffer.readVarInt();
+        CompoundTag data = buffer.readNbt();
+        return new ServerSurveyActionPayload(action, hand, data == null ? new CompoundTag() : data);
+    }
+
+    public static void handle(ServerSurveyActionPayload message, Supplier<NetworkEvent.Context> contextSupplier) {
+        SurveyNetworking.handleServerAction(message, contextSupplier);
     }
 }

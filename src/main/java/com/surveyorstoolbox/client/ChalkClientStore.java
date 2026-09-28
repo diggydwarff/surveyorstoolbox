@@ -2,13 +2,13 @@ package com.surveyorstoolbox.client;
 
 import com.surveyorstoolbox.chalk.ChalkMark;
 import com.surveyorstoolbox.network.ServerSurveyActionPayload;
+import com.surveyorstoolbox.network.SurveyNetworking;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,20 +23,20 @@ public final class ChalkClientStore {
     private static long lastRequestGameTime = Long.MIN_VALUE;
 
     public static void tick(Player player) {
-        if (activeLevel != player.level()) {
-            activeLevel = player.level();
+        if (activeLevel != player.getLevel()) {
+            activeLevel = player.getLevel();
             MARKS.clear();
             lastRequestPosition = null;
             lastRequestGameTime = Long.MIN_VALUE;
         }
 
-        long now = player.level().getGameTime();
+        long now = player.getLevel().getGameTime();
         boolean moved = lastRequestPosition == null
                 || player.position().distanceToSqr(lastRequestPosition) > 24.0D * 24.0D;
         boolean stale = now - lastRequestGameTime >= 100L;
 
         if (lastRequestPosition == null || moved || stale) {
-            PacketDistributor.sendToServer(ServerSurveyActionPayload.requestSync());
+            SurveyNetworking.sendToServer(ServerSurveyActionPayload.requestSync());
             lastRequestPosition = player.position();
             lastRequestGameTime = now;
         }
@@ -57,9 +57,7 @@ public final class ChalkClientStore {
         }
     }
 
-    public static List<ChalkMark> marks() {
-        return VIEW;
-    }
+    public static List<ChalkMark> marks() { return VIEW; }
 
     public static void clear() {
         MARKS.clear();

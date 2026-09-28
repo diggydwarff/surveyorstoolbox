@@ -1,7 +1,6 @@
 package com.surveyorstoolbox.chalk;
 
 import com.surveyorstoolbox.measurement.MeasurementSnapshot;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -24,12 +23,13 @@ public final class ChalkSavedData extends SavedData {
 
     public static ChalkSavedData get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(ChalkSavedData::new, ChalkSavedData::load),
+                ChalkSavedData::load,
+                ChalkSavedData::new,
                 DATA_NAME
         );
     }
 
-    public static ChalkSavedData load(CompoundTag tag, HolderLookup.Provider registries) {
+    public static ChalkSavedData load(CompoundTag tag) {
         ChalkSavedData data = new ChalkSavedData();
         ListTag list = tag.getList("Marks", Tag.TAG_COMPOUND);
 
@@ -43,7 +43,7 @@ public final class ChalkSavedData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    public CompoundTag save(CompoundTag tag) {
         ListTag list = new ListTag();
         for (ChalkMark mark : marks) {
             list.add(mark.toTag());
@@ -119,18 +119,7 @@ public final class ChalkSavedData extends SavedData {
         return removed;
     }
 
-    public enum AddResult {
-        ADDED,
-        DUPLICATE,
-        FULL,
-        INVALID
-    }
-
-    public enum RemovalResult {
-        NONE,
-        NOT_OWNER,
-        REMOVED
-    }
-
+    public enum AddResult { ADDED, DUPLICATE, FULL, INVALID }
+    public enum RemovalResult { NONE, NOT_OWNER, REMOVED }
     private record MarkDistance(ChalkMark mark, double distance) { }
 }

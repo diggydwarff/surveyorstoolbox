@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "category": "misc",
   "ingredients": [
     {
       "item": "surveyors_toolbox:white_chalk"
@@ -10,7 +9,7 @@
     }
   ],
   "result": {
-    "id": "surveyors_toolbox:cyan_chalk",
-    "count": 1
+    "count": 1,
+    "item": "surveyors_toolbox:cyan_chalk"
   }
 }

@@ -1,27 +1,27 @@
 package com.surveyorstoolbox.client;
 
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.surveyorstoolbox.SurveyorsToolbox;
 import com.surveyorstoolbox.measurement.MeasurementMode;
 import com.surveyorstoolbox.measurement.SurveyManager;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import org.joml.Matrix4f;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import com.mojang.math.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -41,7 +41,7 @@ import java.util.Set;
  *
  * Nothing here creates entities or modifies the level.
  */
-@EventBusSubscriber(modid = SurveyorsToolbox.MOD_ID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = SurveyorsToolbox.MOD_ID, value = Dist.CLIENT)
 public final class SurveyRenderer {
     private static final NeonColor ACTIVE = new NeonColor(0.05f, 0.95f, 1.00f);
     private static final NeonColor COMPLETE = new NeonColor(0.20f, 1.00f, 0.35f);
@@ -52,24 +52,9 @@ public final class SurveyRenderer {
      * Faint no-depth-test pass. The normal neon line still depth-tests, while this
      * pass keeps buried/occluded portions readable through terrain.
      */
-    private static final RenderType XRAY_LINES = RenderType.create(
-            "surveyors_toolbox_xray_lines",
-            DefaultVertexFormat.POSITION_COLOR_NORMAL,
-            VertexFormat.Mode.LINES,
-            256,
-            false,
-            false,
-            RenderType.CompositeState.builder()
-                    .setShaderState(RenderType.RENDERTYPE_LINES_SHADER)
-                    .setLineState(RenderType.DEFAULT_LINE)
-                    .setLayeringState(RenderType.VIEW_OFFSET_Z_LAYERING)
-                    .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
-                    .setDepthTestState(RenderType.NO_DEPTH_TEST)
-                    .setCullState(RenderType.NO_CULL)
-                    .setOutputState(RenderType.ITEM_ENTITY_TARGET)
-                    .setWriteMaskState(RenderType.COLOR_WRITE)
-                    .createCompositeState(false)
-    );
+    // Dedicated no-depth-test translucent pass; this keeps occluded portions
+    // faintly visible through terrain, matching the older mod versions.
+    private static final RenderType XRAY_LINES = SurveyRenderTypes.XRAY_LINES;
 
     private static final double GLOW_OUTER_WIDTH = 7.0D;
     private static final double GLOW_INNER_WIDTH = 3.5D;
@@ -87,7 +72,7 @@ public final class SurveyRenderer {
     // Keep survey geometry off Minecraft's shared world-render buffers.
     // RenderLevelStageEvent fires while vanilla/other mods may be finishing those
     // buffers; owning this source prevents stale BufferBuilder instances.
-    private static final ByteBufferBuilder SURVEY_BYTE_BUFFER = new ByteBufferBuilder(2 * 1024 * 1024);
+    private static final BufferBuilder SURVEY_BYTE_BUFFER = new BufferBuilder(2 * 1024 * 1024);
     private static final MultiBufferSource.BufferSource SURVEY_BUFFERS = MultiBufferSource.immediate(SURVEY_BYTE_BUFFER);
 
 
@@ -128,7 +113,8 @@ public final class SurveyRenderer {
     }
 
     @SubscribeEvent
-    public static void onRenderGui(RenderGuiEvent.Post event) {
+    public static void onRenderGui(RenderGuiOverlayEvent.Post event) {
+        if (event.getOverlay() != VanillaGuiOverlay.HOTBAR.type()) return;
         if (!SurveyManager.isFinalized()) return;
 
         Minecraft minecraft = Minecraft.getInstance();
@@ -145,13 +131,15 @@ public final class SurveyRenderer {
         Vec3 cameraPos = camera.getPosition();
         if (anchor.distanceToSqr(cameraPos) > LABEL_MAX_DISTANCE * LABEL_MAX_DISTANCE) return;
 
-        ScreenPoint projected = projectToScreen(anchor, camera, event.getGuiGraphics().guiWidth(), event.getGuiGraphics().guiHeight(), minecraft);
+        int guiWidth = event.getWindow().getGuiScaledWidth();
+        int guiHeight = event.getWindow().getGuiScaledHeight();
+        ScreenPoint projected = projectToScreen(anchor, camera, guiWidth, guiHeight, minecraft);
         if (projected == null) return;
 
         List<String> lines = hologramLines(SurveyManager.getResultLabel());
         if (lines.isEmpty()) return;
 
-        var graphics = event.getGuiGraphics();
+        PoseStack guiPose = event.getPoseStack();
         var font = minecraft.font;
 
         int maxWidth = 0;
@@ -166,9 +154,9 @@ public final class SurveyRenderer {
         int boxHeight = lines.size() * lineHeight + paddingY * 2 - 1;
 
         int centerX = Math.max(boxWidth / 2 + 3,
-                Math.min(graphics.guiWidth() - boxWidth / 2 - 3, projected.x()));
+                Math.min(guiWidth - boxWidth / 2 - 3, projected.x()));
         int topY = Math.max(3,
-                Math.min(graphics.guiHeight() - boxHeight - 3, projected.y() - boxHeight / 2));
+                Math.min(guiHeight - boxHeight - 3, projected.y() - boxHeight / 2));
 
         int left = centerX - boxWidth / 2;
         int right = left + boxWidth;
@@ -176,14 +164,14 @@ public final class SurveyRenderer {
 
         // Restrained survey-hologram plate: dark translucent backing with a thin
         // green accent. It stays readable without becoming a giant HUD element.
-        graphics.fill(left, topY, right, bottom, 0xA6121A14);
-        graphics.fill(left, topY, right, topY + 1, 0xD84AF06A);
-        graphics.fill(left, bottom - 1, right, bottom, 0x804AF06A);
+        GuiComponent.fill(guiPose, left, topY, right, bottom, 0xA6121A14);
+        GuiComponent.fill(guiPose, left, topY, right, topY + 1, 0xD84AF06A);
+        GuiComponent.fill(guiPose, left, bottom - 1, right, bottom, 0x804AF06A);
 
         for (int i = 0; i < lines.size(); i++) {
             int y = topY + paddingY + i * lineHeight;
             int color = i == 0 ? 0xFFF1FFF3 : 0xFFD1F3D6;
-            graphics.drawCenteredString(font, lines.get(i), centerX, y, color);
+            font.drawShadow(guiPose, lines.get(i), centerX - font.width(lines.get(i)) / 2.0f, y, color);
         }
     }
 
@@ -672,18 +660,18 @@ public final class SurveyRenderer {
     private static void drawGlowStrip(PoseStack poseStack, MultiBufferSource.BufferSource buffers,
                                       List<Vec3> points, boolean close, NeonColor color,
                                       double width, float alpha, double yOffset) {
-        RenderType type = RenderType.debugLineStrip(width);
+        RenderType type = width > 5.0D
+                ? SurveyRenderTypes.GLOW_OUTER_LINES
+                : SurveyRenderTypes.GLOW_INNER_LINES;
         VertexConsumer consumer = buffers.getBuffer(type);
         Matrix4f matrix = poseStack.last().pose();
 
         for (Vec3 point : points) {
-            consumer.addVertex(matrix, (float) point.x, (float) (point.y + yOffset), (float) point.z)
-                    .setColor(color.r(), color.g(), color.b(), alpha);
+            consumer.vertex(matrix, (float) point.x, (float) (point.y + yOffset), (float) point.z).color(color.r(), color.g(), color.b(), alpha).endVertex();
         }
         if (close && points.size() > 2) {
             Vec3 first = points.get(0);
-            consumer.addVertex(matrix, (float) first.x, (float) (first.y + yOffset), (float) first.z)
-                    .setColor(color.r(), color.g(), color.b(), alpha);
+            consumer.vertex(matrix, (float) first.x, (float) (first.y + yOffset), (float) first.z).color(color.r(), color.g(), color.b(), alpha).endVertex();
         }
 
         // Flush to terminate this strip. Otherwise the next independent strip would connect to it.
@@ -708,24 +696,24 @@ public final class SurveyRenderer {
         dz /= length;
 
         Matrix4f matrix = poseStack.last().pose();
-        consumer.addVertex(matrix, (float) a.x, (float) (a.y + yOffset), (float) a.z)
-                .setColor(color.r(), color.g(), color.b(), alpha)
-                .setNormal(poseStack.last(), dx, dy, dz);
-        consumer.addVertex(matrix, (float) b.x, (float) (b.y + yOffset), (float) b.z)
-                .setColor(color.r(), color.g(), color.b(), alpha)
-                .setNormal(poseStack.last(), dx, dy, dz);
+        consumer.vertex(matrix, (float) a.x, (float) (a.y + yOffset), (float) a.z)
+                .color(color.r(), color.g(), color.b(), alpha)
+                .normal(poseStack.last().normal(), dx, dy, dz)
+                .endVertex();
+        consumer.vertex(matrix, (float) b.x, (float) (b.y + yOffset), (float) b.z)
+                .color(color.r(), color.g(), color.b(), alpha)
+                .normal(poseStack.last().normal(), dx, dy, dz)
+                .endVertex();
     }
 
     private static void renderNode(PoseStack poseStack, MultiBufferSource.BufferSource buffers,
                                    Vec3 point, NeonColor color) {
         double size = 0.13;
-        VertexConsumer fill = buffers.getBuffer(RenderType.debugFilledBox());
-        LevelRenderer.addChainedFilledBoxVertices(
-                poseStack, fill,
+        VertexConsumer fill = buffers.getBuffer(SurveyRenderTypes.SURVEY_FILL);
+        addFilledBox(poseStack, fill,
                 point.x - size, point.y - size, point.z - size,
                 point.x + size, point.y + size, point.z + size,
-                color.r(), color.g(), color.b(), 0.24f
-        );
+                color, 0.24f);
 
         VertexConsumer xray = buffers.getBuffer(XRAY_LINES);
         LevelRenderer.renderLineBox(
@@ -748,12 +736,35 @@ public final class SurveyRenderer {
                                            double minX, double minY, double minZ,
                                            double maxX, double maxY, double maxZ,
                                            NeonColor color, float alpha) {
-        VertexConsumer fill = buffers.getBuffer(RenderType.debugFilledBox());
-        LevelRenderer.addChainedFilledBoxVertices(
-                poseStack, fill,
-                minX, minY, minZ, maxX, maxY, maxZ,
-                color.r(), color.g(), color.b(), alpha
-        );
+        VertexConsumer fill = buffers.getBuffer(SurveyRenderTypes.SURVEY_FILL);
+        addFilledBox(poseStack, fill, minX, minY, minZ, maxX, maxY, maxZ, color, alpha);
+    }
+
+    private static void addFilledBox(PoseStack poseStack, VertexConsumer fill,
+                                     double minX, double minY, double minZ,
+                                     double maxX, double maxY, double maxZ,
+                                     NeonColor color, float alpha) {
+        Matrix4f m = poseStack.last().pose();
+        // Bottom
+        quad(fill, m, minX,minY,minZ, maxX,minY,minZ, maxX,minY,maxZ, minX,minY,maxZ, color, alpha);
+        // Top
+        quad(fill, m, minX,maxY,maxZ, maxX,maxY,maxZ, maxX,maxY,minZ, minX,maxY,minZ, color, alpha);
+        // North / South
+        quad(fill, m, minX,minY,minZ, minX,maxY,minZ, maxX,maxY,minZ, maxX,minY,minZ, color, alpha);
+        quad(fill, m, maxX,minY,maxZ, maxX,maxY,maxZ, minX,maxY,maxZ, minX,minY,maxZ, color, alpha);
+        // West / East
+        quad(fill, m, minX,minY,maxZ, minX,maxY,maxZ, minX,maxY,minZ, minX,minY,minZ, color, alpha);
+        quad(fill, m, maxX,minY,minZ, maxX,maxY,minZ, maxX,maxY,maxZ, maxX,minY,maxZ, color, alpha);
+    }
+
+    private static void quad(VertexConsumer fill, Matrix4f m,
+                             double ax,double ay,double az, double bx,double by,double bz,
+                             double cx,double cy,double cz, double dx,double dy,double dz,
+                             NeonColor color, float alpha) {
+        fill.vertex(m,(float)ax,(float)ay,(float)az).color(color.r(),color.g(),color.b(),alpha).endVertex();
+        fill.vertex(m,(float)bx,(float)by,(float)bz).color(color.r(),color.g(),color.b(),alpha).endVertex();
+        fill.vertex(m,(float)cx,(float)cy,(float)cz).color(color.r(),color.g(),color.b(),alpha).endVertex();
+        fill.vertex(m,(float)dx,(float)dy,(float)dz).color(color.r(),color.g(),color.b(),alpha).endVertex();
     }
 
     private static void renderPolygonFill(PoseStack poseStack, MultiBufferSource.BufferSource buffers,
@@ -766,8 +777,8 @@ public final class SurveyRenderer {
         }
         if (cachedPolygonTriangles.isEmpty()) return;
 
-        // debugQuads is two-sided, which keeps the planar fill visible from above or below.
-        VertexConsumer fill = buffers.getBuffer(RenderType.debugQuads());
+        // The custom fill type has culling disabled, keeping planar fills visible from either side.
+        VertexConsumer fill = buffers.getBuffer(SurveyRenderTypes.SURVEY_FILL);
         Matrix4f matrix = poseStack.last().pose();
         for (Triangle triangle : cachedPolygonTriangles) {
             Vec3 a = triangle.a();
@@ -777,12 +788,12 @@ public final class SurveyRenderer {
             float by = (float) (b.y + 0.015 + yOffset);
             float cy = (float) (c.y + 0.015 + yOffset);
 
-            // RenderType.debugQuads() uses QUADS. Repeating C makes the second
+            // SURVEY_FILL uses QUADS. Repeating C makes the second
             // triangle degenerate while the first triangle fills A-B-C.
-            fill.addVertex(matrix, (float) a.x, ay, (float) a.z).setColor(color.r(), color.g(), color.b(), alpha);
-            fill.addVertex(matrix, (float) b.x, by, (float) b.z).setColor(color.r(), color.g(), color.b(), alpha);
-            fill.addVertex(matrix, (float) c.x, cy, (float) c.z).setColor(color.r(), color.g(), color.b(), alpha);
-            fill.addVertex(matrix, (float) c.x, cy, (float) c.z).setColor(color.r(), color.g(), color.b(), alpha);
+            fill.vertex(matrix, (float) a.x, ay, (float) a.z).color(color.r(), color.g(), color.b(), alpha).endVertex();
+            fill.vertex(matrix, (float) b.x, by, (float) b.z).color(color.r(), color.g(), color.b(), alpha).endVertex();
+            fill.vertex(matrix, (float) c.x, cy, (float) c.z).color(color.r(), color.g(), color.b(), alpha).endVertex();
+            fill.vertex(matrix, (float) c.x, cy, (float) c.z).color(color.r(), color.g(), color.b(), alpha).endVertex();
         }
     }
 

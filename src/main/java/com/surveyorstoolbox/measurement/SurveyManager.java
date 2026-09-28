@@ -49,8 +49,8 @@ public final class SurveyManager {
     private static final int WALK_AUTO_CLOSE_MIN_POINTS = 12;
 
     public static void ensureLevel(Player player) {
-        if (activeLevel != player.level() || activePlayer != player) {
-            activeLevel = player.level();
+        if (activeLevel != player.getLevel() || activePlayer != player) {
+            activeLevel = player.getLevel();
             activePlayer = player;
             resetMeasurement();
         }
@@ -66,7 +66,7 @@ public final class SurveyManager {
         ensureLevel(player);
         if (finalized
                 && finalizedUntilGameTime > 0L
-                && player.level().getGameTime() >= finalizedUntilGameTime) {
+                && player.getLevel().getGameTime() >= finalizedUntilGameTime) {
             resetMeasurement();
         }
     }
@@ -386,7 +386,7 @@ public final class SurveyManager {
     }
 
     private static boolean measureInterior(BlockPos clickedFloor, Player player) {
-        Level level = player.level();
+        Level level = player.getLevel();
         interiorCells.clear();
 
         BlockPos start = normalizeFloorStart(level, clickedFloor);
@@ -577,7 +577,7 @@ public final class SurveyManager {
 
     private static void finalizeMeasurement(Player player) {
         finalized = true;
-        finalizedUntilGameTime = player.level().getGameTime() + COMPLETED_HOLOGRAM_TICKS;
+        finalizedUntilGameTime = player.getLevel().getGameTime() + COMPLETED_HOLOGRAM_TICKS;
         touchVisuals();
     }
 

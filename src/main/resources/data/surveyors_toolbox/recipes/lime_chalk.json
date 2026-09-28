@@ -1,16 +1,15 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "category": "misc",
   "ingredients": [
     {
       "item": "surveyors_toolbox:white_chalk"
     },
     {
-      "item": "minecraft:gray_dye"
+      "item": "minecraft:lime_dye"
     }
   ],
   "result": {
-    "id": "surveyors_toolbox:gray_chalk",
-    "count": 1
+    "count": 1,
+    "item": "surveyors_toolbox:lime_chalk"
   }
 }

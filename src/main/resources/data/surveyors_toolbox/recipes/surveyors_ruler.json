@@ -14,8 +14,7 @@
     }
   },
   "result": {
-    "id": "surveyors_toolbox:surveyors_ruler",
-    "count": 1
-  },
-  "category": "equipment"
+    "count": 1,
+    "item": "surveyors_toolbox:surveyors_ruler"
+  }
 }

@@ -7,16 +7,16 @@ import com.surveyorstoolbox.item.ChalkItem;
 import com.surveyorstoolbox.measurement.SurveyManager;
 import com.surveyorstoolbox.registry.ModItems;
 import net.minecraft.world.InteractionResult;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
-@EventBusSubscriber(modid = SurveyorsToolbox.MOD_ID)
+@Mod.EventBusSubscriber(modid = SurveyorsToolbox.MOD_ID)
 public final class CommonInteractionEvents {
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (event.getItemStack().is(ModItems.SURVEYORS_RULER.get())) {
-            if (event.getEntity().level().isClientSide()) {
+            if (event.getEntity().getLevel().isClientSide()) {
                 SurveyManager.handleBlockUse(event.getPos(), event.getEntity());
             }
             cancel(event);
@@ -24,7 +24,7 @@ public final class CommonInteractionEvents {
         }
 
         if (event.getItemStack().getItem() instanceof ChalkItem) {
-            if (event.getEntity().level().isClientSide()) {
+            if (event.getEntity().getLevel().isClientSide()) {
                 SurveyClientActions.commitChalk(event.getEntity(), event.getHand());
             }
             cancel(event);
@@ -32,7 +32,7 @@ public final class CommonInteractionEvents {
         }
 
         if (event.getItemStack().getItem() instanceof ArchitectsEraserItem) {
-            if (event.getEntity().level().isClientSide()) {
+            if (event.getEntity().getLevel().isClientSide()) {
                 if (event.getEntity().isShiftKeyDown()) {
                     SurveyClientActions.clearOwnChalk(event.getHand());
                 } else {
@@ -40,16 +40,14 @@ public final class CommonInteractionEvents {
                 }
             }
             cancel(event);
-            return;
         }
-
     }
 
     @SubscribeEvent
     public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
         if (event.getItemStack().is(ModItems.SURVEYORS_RULER.get())) {
             if (!event.getEntity().isShiftKeyDown()) return;
-            if (event.getEntity().level().isClientSide()) {
+            if (event.getEntity().getLevel().isClientSide()) {
                 SurveyManager.handleAirUse(event.getEntity());
             }
             cancel(event);
@@ -57,7 +55,7 @@ public final class CommonInteractionEvents {
         }
 
         if (event.getItemStack().getItem() instanceof ChalkItem) {
-            if (event.getEntity().level().isClientSide()) {
+            if (event.getEntity().getLevel().isClientSide()) {
                 SurveyClientActions.commitChalk(event.getEntity(), event.getHand());
             }
             cancel(event);
@@ -66,13 +64,11 @@ public final class CommonInteractionEvents {
 
         if (event.getItemStack().getItem() instanceof ArchitectsEraserItem) {
             if (!event.getEntity().isShiftKeyDown()) return;
-            if (event.getEntity().level().isClientSide()) {
+            if (event.getEntity().getLevel().isClientSide()) {
                 SurveyClientActions.clearOwnChalk(event.getHand());
             }
             cancel(event);
-            return;
         }
-
     }
 
     private static void cancel(PlayerInteractEvent.RightClickBlock event) {

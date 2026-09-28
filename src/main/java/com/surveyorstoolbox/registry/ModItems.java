@@ -4,46 +4,42 @@ import com.surveyorstoolbox.SurveyorsToolbox;
 import com.surveyorstoolbox.item.ArchitectsEraserItem;
 import com.surveyorstoolbox.item.ChalkItem;
 import com.surveyorstoolbox.item.SurveyorsRulerItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.EnumMap;
 import java.util.Map;
 
 public final class ModItems {
-    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SurveyorsToolbox.MOD_ID);
+    public static final DeferredRegister<Item> ITEMS =
+            DeferredRegister.create(ForgeRegistries.ITEMS, SurveyorsToolbox.MOD_ID);
 
-    public static final DeferredItem<SurveyorsRulerItem> SURVEYORS_RULER = ITEMS.registerItem(
+    public static final RegistryObject<SurveyorsRulerItem> SURVEYORS_RULER = ITEMS.register(
             "surveyors_ruler",
-            SurveyorsRulerItem::new,
-            new Item.Properties().stacksTo(1)
+            () -> new SurveyorsRulerItem(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TOOLS))
     );
 
-    public static final Map<DyeColor, DeferredItem<ChalkItem>> CHALKS = new EnumMap<>(DyeColor.class);
+    public static final Map<DyeColor, RegistryObject<ChalkItem>> CHALKS = new EnumMap<>(DyeColor.class);
 
-
-    public static final DeferredItem<ArchitectsEraserItem> ARCHITECTS_ERASER = ITEMS.registerItem(
+    public static final RegistryObject<ArchitectsEraserItem> ARCHITECTS_ERASER = ITEMS.register(
             "architects_eraser",
-            ArchitectsEraserItem::new,
-            new Item.Properties().stacksTo(1)
+            () -> new ArchitectsEraserItem(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TOOLS))
     );
-
 
     static {
         for (DyeColor color : DyeColor.values()) {
-            CHALKS.put(color, ITEMS.registerItem(
+            CHALKS.put(color, ITEMS.register(
                     color.getName() + "_chalk",
-                    properties -> new ChalkItem(color, properties),
-                    new Item.Properties().durability(32)
+                    () -> new ChalkItem(color, new Item.Properties().durability(32).tab(CreativeModeTab.TAB_TOOLS))
             ));
         }
     }
 
-    public static DeferredItem<ChalkItem> chalk(DyeColor color) {
-        return CHALKS.get(color);
-    }
+    public static RegistryObject<ChalkItem> chalk(DyeColor color) { return CHALKS.get(color); }
 
     private ModItems() { }
 }

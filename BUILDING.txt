@@ -1,8 +1,19 @@
-Complete source project.
+Surveyor's Toolbox - Forge 1.19.2 port
 
-The Gradle wrapper binary JAR is not generated here. Either:
-1. Open with local Gradle 9.2.1, or
-2. Copy gradle-wrapper.jar plus gradlew / gradlew.bat from the official NeoForge 1.21.1 ModDevGradle MDK.
+Target:
+- Minecraft 1.19.2
+- Forge 43.5.2
+- Java 17
+- ForgeGradle 5.1.x
+- Gradle 7.5.1
 
-Then run:
-gradle build
+Build:
+  gradlew build
+
+Run client:
+  gradlew runClient
+
+Output jar:
+  build/libs/surveyors_toolbox-1.0.0.jar
+
+This port preserves the current feature set: all survey modes, HUD labels, persistent colored chalk guides, eraser ownership/admin behavior, client/server sync, and the faint no-depth-test translucent line pass for occluded measurements.

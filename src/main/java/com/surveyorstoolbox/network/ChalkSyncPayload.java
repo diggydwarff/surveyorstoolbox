@@ -1,26 +1,30 @@
 package com.surveyorstoolbox.network;
 
-import com.surveyorstoolbox.SurveyorsToolbox;
+import com.surveyorstoolbox.client.ClientPacketHandler;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.network.NetworkEvent;
 
-public record ChalkSyncPayload(CompoundTag data) implements CustomPacketPayload {
-    public static final Type<ChalkSyncPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(SurveyorsToolbox.MOD_ID, "chalk_sync")
-    );
+import java.util.function.Supplier;
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ChalkSyncPayload> STREAM_CODEC =
-            StreamCodec.composite(
-                    ByteBufCodecs.COMPOUND_TAG, ChalkSyncPayload::data,
-                    ChalkSyncPayload::new
-            );
+public record ChalkSyncPayload(CompoundTag data) {
+    public static void encode(ChalkSyncPayload message, FriendlyByteBuf buffer) {
+        buffer.writeNbt(message.data());
+    }
 
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public static ChalkSyncPayload decode(FriendlyByteBuf buffer) {
+        CompoundTag tag = buffer.readNbt();
+        return new ChalkSyncPayload(tag == null ? new CompoundTag() : tag);
+    }
+
+    public static void handle(ChalkSyncPayload message, Supplier<NetworkEvent.Context> contextSupplier) {
+        NetworkEvent.Context context = contextSupplier.get();
+        context.enqueueWork(() -> DistExecutor.unsafeRunWhenOn(
+                Dist.CLIENT,
+                () -> () -> ClientPacketHandler.handleChalkSync(message)
+        ));
+        context.setPacketHandled(true);
     }
 }

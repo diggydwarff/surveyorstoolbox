@@ -1,53 +1,40 @@
 package com.surveyorstoolbox.client;
 
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.surveyorstoolbox.SurveyorsToolbox;
 import com.surveyorstoolbox.chalk.ChalkMark;
 import com.surveyorstoolbox.measurement.MeasurementMode;
 import com.surveyorstoolbox.measurement.MeasurementSnapshot;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import org.joml.Matrix4f;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import com.mojang.math.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-@EventBusSubscriber(modid = SurveyorsToolbox.MOD_ID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = SurveyorsToolbox.MOD_ID, value = Dist.CLIENT)
 public final class PersistentSurveyRenderer {
-    private static final ByteBufferBuilder BUFFER = new ByteBufferBuilder(2 * 1024 * 1024);
+    private static final BufferBuilder BUFFER = new BufferBuilder(2 * 1024 * 1024);
     private static final MultiBufferSource.BufferSource BUFFERS = MultiBufferSource.immediate(BUFFER);
 
-    private static final RenderType XRAY_LINES = RenderType.create(
-            "surveyors_toolbox_persistent_xray",
-            DefaultVertexFormat.POSITION_COLOR_NORMAL,
-            VertexFormat.Mode.LINES,
-            256,
-            false,
-            false,
-            RenderType.CompositeState.builder()
-                    .setShaderState(RenderType.RENDERTYPE_LINES_SHADER)
-                    .setLineState(RenderType.DEFAULT_LINE)
-                    .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
-                    .setDepthTestState(RenderType.NO_DEPTH_TEST)
-                    .setCullState(RenderType.NO_CULL)
-                    .setWriteMaskState(RenderType.COLOR_WRITE)
-                    .createCompositeState(false)
-    );
+    // Dedicated no-depth-test translucent pass; this keeps occluded portions
+    // faintly visible through terrain, matching the older mod versions.
+    private static final RenderType XRAY_LINES = SurveyRenderTypes.XRAY_LINES;
 
     private static final double CHALK_RENDER_DISTANCE = 96.0D;
     private static final double CHALK_FULL_DISTANCE = 36.0D;
@@ -94,18 +81,19 @@ public final class PersistentSurveyRenderer {
     }
 
     @SubscribeEvent
-    public static void onRenderGui(RenderGuiEvent.Post event) {
+    public static void onRenderGui(RenderGuiOverlayEvent.Post event) {
+        if (event.getOverlay() != VanillaGuiOverlay.HOTBAR.type()) return;
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.level == null) return;
 
         if (ChalkClientStore.marks().isEmpty()) return;
 
-        var graphics = event.getGuiGraphics();
+        PoseStack guiPose = event.getPoseStack();
         var font = minecraft.font;
         Camera camera = minecraft.gameRenderer.getMainCamera();
         Vec3 cameraPos = camera.getPosition();
-        int guiWidth = graphics.guiWidth();
-        int guiHeight = graphics.guiHeight();
+        int guiWidth = event.getWindow().getGuiScaledWidth();
+        int guiHeight = event.getWindow().getGuiScaledHeight();
 
         List<LabelCandidate> candidates = new ArrayList<>();
 
@@ -161,39 +149,41 @@ public final class PersistentSurveyRenderer {
             int accent = (0xDD << 24) | (candidate.accentArgb() & 0x00FFFFFF);
             int textColor = 0xFFF0FFF2;
 
-            graphics.fill(placement.left(), placement.top(), placement.right(), placement.bottom(), background);
-            graphics.fill(placement.left(), placement.top(), placement.right(), placement.top() + 1, accent);
+            GuiComponent.fill(guiPose, placement.left(), placement.top(), placement.right(), placement.bottom(), background);
+            GuiComponent.fill(guiPose, placement.left(), placement.top(), placement.right(), placement.top() + 1, accent);
 
             int textX = placement.left() + LABEL_PADDING_X;
             int textY = placement.top() + 3;
-            graphics.drawString(font, candidate.text(), textX, textY, textColor, false);
+            font.draw(guiPose, candidate.text(), textX, textY, textColor);
 
             occupied.add(placement.inflate(2));
             rendered++;
         }
 
         if (focus != null) {
-            renderFocusedPanel(graphics, minecraft, focus);
+            renderFocusedPanel(guiPose, minecraft, focus, guiWidth, guiHeight);
         }
     }
 
-    private static void renderFocusedPanel(net.minecraft.client.gui.GuiGraphics graphics,
+    private static void renderFocusedPanel(PoseStack guiPose,
                                            Minecraft minecraft,
-                                           ChalkMark focus) {
+                                           ChalkMark focus,
+                                           int guiWidth,
+                                           int guiHeight) {
         var font = minecraft.font;
         String title = capitalize(focus.color().getName()) + " chalk • " + focus.ownerName();
         String detail = focus.measurement().label();
         if (detail.length() > 92) detail = detail.substring(0, 91) + "…";
 
         int width = Math.max(font.width(title), font.width(detail)) + 12;
-        int x = (graphics.guiWidth() - width) / 2;
-        int y = Math.max(8, graphics.guiHeight() / 7);
+        int x = (guiWidth - width) / 2;
+        int y = Math.max(8, guiHeight / 7);
         int accent = (0xDD << 24) | (argb(focus.color()) & 0x00FFFFFF);
 
-        graphics.fill(x, y, x + width, y + 25, 0xB8101512);
-        graphics.fill(x, y, x + width, y + 1, accent);
-        graphics.drawCenteredString(font, title, graphics.guiWidth() / 2, y + 4, 0xFFE9FFF0);
-        graphics.drawCenteredString(font, detail, graphics.guiWidth() / 2, y + 14, 0xFFCDE8D2);
+        GuiComponent.fill(guiPose, x, y, x + width, y + 25, 0xB8101512);
+        GuiComponent.fill(guiPose, x, y, x + width, y + 1, accent);
+        font.drawShadow(guiPose, title, guiWidth / 2.0f - font.width(title) / 2.0f, y + 4, 0xFFE9FFF0);
+        font.drawShadow(guiPose, detail, guiWidth / 2.0f - font.width(detail) / 2.0f, y + 14, 0xFFCDE8D2);
     }
 
     private static ChalkMark focusedMark(Minecraft minecraft) {
@@ -541,8 +531,11 @@ public final class PersistentSurveyRenderer {
     }
 
     private static int argb(DyeColor dye) {
-        int rgb = dye.getTextureDiffuseColor();
-        return 0xFF000000 | (rgb & 0x00FFFFFF);
+        float[] diffuse = dye.getTextureDiffuseColors();
+        int r = Math.max(0, Math.min(255, Math.round(diffuse[0] * 255.0f)));
+        int g = Math.max(0, Math.min(255, Math.round(diffuse[1] * 255.0f)));
+        int b = Math.max(0, Math.min(255, Math.round(diffuse[2] * 255.0f)));
+        return 0xFF000000 | (r << 16) | (g << 8) | b;
     }
 
     private static void renderSnapshot(PoseStack poseStack,
@@ -737,12 +730,14 @@ public final class PersistentSurveyRenderer {
         dx /= length; dy /= length; dz /= length;
 
         Matrix4f matrix = poseStack.last().pose();
-        consumer.addVertex(matrix, (float)a.x, (float)a.y, (float)a.z)
-                .setColor(color.r(), color.g(), color.b(), alpha)
-                .setNormal(poseStack.last(), dx, dy, dz);
-        consumer.addVertex(matrix, (float)b.x, (float)b.y, (float)b.z)
-                .setColor(color.r(), color.g(), color.b(), alpha)
-                .setNormal(poseStack.last(), dx, dy, dz);
+        consumer.vertex(matrix, (float)a.x, (float)a.y, (float)a.z)
+                .color(color.r(), color.g(), color.b(), alpha)
+                .normal(poseStack.last().normal(), dx, dy, dz)
+                .endVertex();
+        consumer.vertex(matrix, (float)b.x, (float)b.y, (float)b.z)
+                .color(color.r(), color.g(), color.b(), alpha)
+                .normal(poseStack.last().normal(), dx, dy, dz)
+                .endVertex();
     }
 
     private static Vec3 center(BlockPos p) {
@@ -754,10 +749,10 @@ public final class PersistentSurveyRenderer {
     }
 
     private static NeonColor color(DyeColor dye, float brightness) {
-        int rgb = dye.getTextureDiffuseColor();
-        float r = ((rgb >> 16) & 0xFF) / 255.0f;
-        float g = ((rgb >> 8) & 0xFF) / 255.0f;
-        float b = (rgb & 0xFF) / 255.0f;
+        float[] diffuse = dye.getTextureDiffuseColors();
+        float r = diffuse[0];
+        float g = diffuse[1];
+        float b = diffuse[2];
 
         // Keep black/brown/gray chalk readable as luminous survey lines.
         r = (0.16f + 0.84f * r) * brightness;

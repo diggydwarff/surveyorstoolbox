@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "category": "equipment",
   "ingredients": [
     {
       "item": "minecraft:slime_ball"
@@ -10,7 +9,7 @@
     }
   ],
   "result": {
-    "id": "surveyors_toolbox:architects_eraser",
-    "count": 1
+    "count": 1,
+    "item": "surveyors_toolbox:architects_eraser"
   }
 }

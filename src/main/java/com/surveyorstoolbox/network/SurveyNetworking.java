@@ -1,8 +1,8 @@
 package com.surveyorstoolbox.network;
 
+import com.surveyorstoolbox.SurveyorsToolbox;
 import com.surveyorstoolbox.chalk.ChalkMark;
 import com.surveyorstoolbox.chalk.ChalkSavedData;
-import com.surveyorstoolbox.client.ChalkClientStore;
 import com.surveyorstoolbox.item.ArchitectsEraserItem;
 import com.surveyorstoolbox.item.ChalkItem;
 import com.surveyorstoolbox.measurement.MeasurementSnapshot;
@@ -11,71 +11,90 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.simple.SimpleChannel;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public final class SurveyNetworking {
+    private static final String PROTOCOL_VERSION = "1";
+
+    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
+            new ResourceLocation(SurveyorsToolbox.MOD_ID, "main"),
+            () -> PROTOCOL_VERSION,
+            PROTOCOL_VERSION::equals,
+            PROTOCOL_VERSION::equals
+    );
+
     private static final double SYNC_RADIUS = 128.0D;
     private static final int MAX_SYNC_MARKS = 128;
     private static final int SYNC_CHUNK_SIZE = 8;
-
     private static final double MAX_COMMIT_DISTANCE = 48.0D;
     private static final double MAX_ERASER_TARGET_DISTANCE = 8.0D;
     private static final long MIN_SYNC_REQUEST_TICKS = 10L;
-
     private static final Map<UUID, Long> LAST_SYNC_REQUEST = new HashMap<>();
 
-    public static void register(RegisterPayloadHandlersEvent event) {
-        var registrar = event.registrar("1");
-
-        registrar.playToServer(
-                ServerSurveyActionPayload.TYPE,
-                ServerSurveyActionPayload.STREAM_CODEC,
-                SurveyNetworking::handleServerAction
+    public static void register() {
+        int id = 0;
+        CHANNEL.registerMessage(
+                id++, ServerSurveyActionPayload.class,
+                ServerSurveyActionPayload::encode,
+                ServerSurveyActionPayload::decode,
+                ServerSurveyActionPayload::handle
         );
-
-        registrar.playToClient(
-                ChalkSyncPayload.TYPE,
-                ChalkSyncPayload.STREAM_CODEC,
-                (payload, context) -> context.enqueueWork(() -> ChalkClientStore.applySync(payload.data()))
+        CHANNEL.registerMessage(
+                id, ChalkSyncPayload.class,
+                ChalkSyncPayload::encode,
+                ChalkSyncPayload::decode,
+                ChalkSyncPayload::handle
         );
     }
 
-    private static void handleServerAction(ServerSurveyActionPayload payload,
-                                           net.neoforged.neoforge.network.handling.IPayloadContext context) {
-        if (!(context.player() instanceof ServerPlayer player)) return;
+    public static void sendToServer(ServerSurveyActionPayload payload) {
+        CHANNEL.sendToServer(payload);
+    }
 
-        // Payload callbacks are not a safe place to mutate level, inventory or
-        // SavedData directly. Move all server actions onto the player's server thread.
+    public static void handleServerAction(ServerSurveyActionPayload payload,
+                                          Supplier<NetworkEvent.Context> contextSupplier) {
+        NetworkEvent.Context context = contextSupplier.get();
+        ServerPlayer player = context.getSender();
+        if (player == null) {
+            context.setPacketHandled(true);
+            return;
+        }
+
         context.enqueueWork(() -> handleServerActionOnMainThread(payload, player));
+        context.setPacketHandled(true);
     }
 
-    private static void handleServerActionOnMainThread(ServerSurveyActionPayload payload,
-                                                       ServerPlayer player) {
+    private static void handleServerActionOnMainThread(ServerSurveyActionPayload payload, ServerPlayer player) {
         InteractionHand hand = payload.hand() == 1 ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
         ItemStack held = player.getItemInHand(hand);
+        ServerLevel level = player.getLevel();
 
         switch (payload.action()) {
             case ServerSurveyActionPayload.REQUEST_SYNC -> {
-                long now = player.serverLevel().getGameTime();
+                long now = level.getGameTime();
                 long previous = LAST_SYNC_REQUEST.getOrDefault(player.getUUID(), Long.MIN_VALUE / 2L);
                 if (now - previous < MIN_SYNC_REQUEST_TICKS) return;
 
                 LAST_SYNC_REQUEST.put(player.getUUID(), now);
                 if (LAST_SYNC_REQUEST.size() > 1024) {
                     LAST_SYNC_REQUEST.keySet().removeIf(uuid ->
-                            player.getServer() == null || player.getServer().getPlayerList().getPlayer(uuid) == null
+                            player.getServer() == null
+                                    || player.getServer().getPlayerList().getPlayer(uuid) == null
                     );
                 }
                 sendSync(player);
@@ -90,14 +109,12 @@ public final class SurveyNetworking {
                     return;
                 }
 
-                ChalkSavedData.AddResult result = ChalkSavedData.get(player.serverLevel())
-                        .add(player, chalk.color(), snapshot);
-
+                ChalkSavedData.AddResult result = ChalkSavedData.get(level).add(player, chalk.color(), snapshot);
                 switch (result) {
                     case ADDED -> {
-                        held.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
+                        held.hurtAndBreak(1, player, entity -> entity.broadcastBreakEvent(hand));
                         status(player, capitalize(chalk.color().getName()) + " chalk guide saved.", ChatFormatting.GREEN);
-                        syncDimension(player.serverLevel());
+                        syncDimension(level);
                     }
                     case DUPLICATE ->
                             status(player, "That measurement is already chalked in this color.", ChatFormatting.GRAY);
@@ -117,11 +134,11 @@ public final class SurveyNetworking {
                     return;
                 }
 
-                var result = ChalkSavedData.get(player.serverLevel()).removeNearest(player, target, 5.5D);
+                ChalkSavedData.RemovalResult result = ChalkSavedData.get(level).removeNearest(player, target, 5.5D);
                 switch (result) {
                     case REMOVED -> {
                         status(player, "Chalk guide erased.", ChatFormatting.GREEN);
-                        syncDimension(player.serverLevel());
+                        syncDimension(level);
                     }
                     case NOT_OWNER ->
                             status(player, "That chalk guide belongs to another player.", ChatFormatting.RED);
@@ -133,11 +150,10 @@ public final class SurveyNetworking {
             case ServerSurveyActionPayload.CLEAR_OWN_CHALK -> {
                 if (!(held.getItem() instanceof ArchitectsEraserItem)) return;
 
-                int removed = ChalkSavedData.get(player.serverLevel()).clearOwned(player.getUUID());
+                int removed = ChalkSavedData.get(level).clearOwned(player.getUUID());
                 status(player, "Cleared " + removed + " of your chalk guides.", ChatFormatting.GRAY);
-                if (removed > 0) syncDimension(player.serverLevel());
+                if (removed > 0) syncDimension(level);
             }
-
 
             default -> { }
         }
@@ -149,15 +165,12 @@ public final class SurveyNetworking {
         return Double.isFinite(distance) && distance <= MAX_COMMIT_DISTANCE;
     }
 
-
     private static void syncDimension(ServerLevel level) {
-        for (ServerPlayer player : level.players()) {
-            sendSync(player);
-        }
+        for (ServerPlayer player : level.players()) sendSync(player);
     }
 
     private static void sendSync(ServerPlayer player) {
-        List<ChalkMark> marks = ChalkSavedData.get(player.serverLevel())
+        List<ChalkMark> marks = ChalkSavedData.get(player.getLevel())
                 .near(player.position(), SYNC_RADIUS, MAX_SYNC_MARKS);
 
         if (marks.isEmpty()) {
@@ -175,14 +188,12 @@ public final class SurveyNetworking {
 
     private static void sendSyncChunk(ServerPlayer player, List<ChalkMark> marks, boolean reset) {
         ListTag list = new ListTag();
-        for (ChalkMark mark : marks) {
-            list.add(mark.toTag());
-        }
+        for (ChalkMark mark : marks) list.add(mark.toTag());
 
         CompoundTag tag = new CompoundTag();
         tag.putBoolean("Reset", reset);
         tag.put("Marks", list);
-        PacketDistributor.sendToPlayer(player, new ChalkSyncPayload(tag));
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new ChalkSyncPayload(tag));
     }
 
     private static void status(ServerPlayer player, String text, ChatFormatting color) {
@@ -200,9 +211,7 @@ public final class SurveyNetworking {
             return new Vec3Target(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
         }
 
-        Vec3 vec() {
-            return new Vec3(x, y, z);
-        }
+        Vec3 vec() { return new Vec3(x, y, z); }
     }
 
     private SurveyNetworking() { }
